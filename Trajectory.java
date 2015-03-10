@@ -4,10 +4,9 @@ class Trajectory implements Handler {
 
 	public Trajectory(Field field) {
 		this.field = field;
-		return;
 	}
 
-	public Particle handler(Particle p) {
-		return;
+	public boolean handle(Particle p) {
+		return false;
 	}
 }
