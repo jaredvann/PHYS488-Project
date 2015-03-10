@@ -1,7 +1,10 @@
 import java.io.*;
 import java.util.Random;
 
-public class MuonFactory()
+public class MuonFactory(){
+  return muon;
+}
+
 {
     static BufferedReader keyboard = new BufferedReader (new InputStreamReader(System.in)) ;
     static PrintWriter screen = new PrintWriter( System.out, true);
@@ -11,9 +14,7 @@ public class MuonFactory()
     static Point position = 0
     static double mass =106
 
-
-    public MuonFactory(){
-    }
+    /*random angle in radians generated and returned*/
 
     public static double muonAngle()
     {
@@ -21,6 +22,7 @@ public class MuonFactory()
         nextangle = value.nextDouble()*Math.PI*2;
         return nextangle;
     }
+    /*Random Momentum in MeV/c generated and returned*/
 
     public static double muonMomentum(){
         double nextP;
