@@ -1,12 +1,16 @@
-import java.io.*; 
+import java.io.*;
 import java.util.Random;
 
-public class MuonFactory
+public class MuonFactory()
 {
     static BufferedReader keyboard = new BufferedReader (new InputStreamReader(System.in)) ;
     static PrintWriter screen = new PrintWriter( System.out, true);
     static Random value = new Random();
     static int underflow;
+    static double age = 0
+    static Point position = 0
+    static double mass =106
+
 
     public MuonFactory(){
     }
@@ -26,4 +30,7 @@ public class MuonFactory
         return nextP;
         }
 
-    }
+    static Particle muon = new particle(mass, nextP, position, nextangle, age);
+    return muon;
+
+      }
