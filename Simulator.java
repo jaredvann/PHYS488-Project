@@ -4,36 +4,45 @@
  */
 public class Simulator {
 
+    private static final screen = new PrintWriter(System.out);
+
     private muonFactory;
 
     private ArrayList<Handler> handlers;
 
-    private Detector triggerA;
-    private Detector triggerB;
-
     public Simulator(double energyLow, double energyHigh) {
         muonFactory = new MuonFactory(energyLow, energyHigh);
 
-        handlers = new ArrayList<>();
-
-        triggerA = new Detector();
-        triggerB = new Detector();
+        handlers = new ArrayList<Handler>();
     }
 
-    public void add(Handler handler) { handler.add(handler); }
+    public void add(Handler handler) { this.handlers.add(handler); }
 
-    public void simulate(Particle p) {
-        for (Handler h : handlers)
-            h.handle(p);
+    public boolean simulate(Particle p) {
+        for (Handler h : handlers) {
+            if (!h.handle(p)) {
+                return false;
+                break;
+            }
+        }
 
-        triggerA.handle();
-        triggerB.handle();
+        return true;
     }
 
     public static void main(String[] args) {
         Simulator me = new Simulator();
         me.add(new Trajectory());
 
-        simulate(muonFactory.newParticle());
+        // Coincidence detector
+        me.add(new Detector());
+        me.add(new Trajectory());
+        me.add(new Detector());
+
+        Particle p = muonFactory.newParticle();
+
+        if (simulate(p))
+            screen.println("Simulation successful!");
+        else
+            screen.println("Simulation unsuccessful!");
     }
 }

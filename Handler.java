@@ -1,5 +1,5 @@
 
 interface Handler {
 
-    public Particle handle();
+    public boolean handle();
 }
