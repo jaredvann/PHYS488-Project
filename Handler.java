@@ -1,5 +1,5 @@
 
-interface Handler {
+public interface Handler {
 
     public boolean handle();
 }
