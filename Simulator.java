@@ -4,19 +4,36 @@
  */
 public class Simulator {
 
-    static muonFactory;
+    private muonFactory;
 
-    public static void simulate(Handler[] handlers, Particle p) {
+    private ArrayList<Handler> handlers;
+
+    private Detector triggerA;
+    private Detector triggerB;
+
+    public Simulator(double energyLow, double energyHigh) {
+        muonFactory = new MuonFactory(energyLow, energyHigh);
+
+        handlers = new ArrayList<>();
+
+        triggerA = new Detector();
+        triggerB = new Detector();
+    }
+
+    public void add(Handler handler) { handler.add(handler); }
+
+    public void simulate(Particle p) {
         for (Handler h : handlers)
             h.handle(p);
+
+        triggerA.handle();
+        triggerB.handle();
     }
 
     public static void main(String[] args) {
-        muonFactory = new MuonFactory();
+        Simulator me = new Simulator();
+        me.add(new Trajectory());
 
-        Handler[] handlers = { new Trajectory(), new Detector() };
-        simulate(handlers, muonFactory.newParticle());
-
-        Screen.out.println("Hello, world!");
+        simulate(muonFactory.newParticle());
     }
 }
