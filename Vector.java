@@ -1,4 +1,7 @@
 
+/** Class that describes a direction in space
+  * 0-3 parameters can be passed depending on dimentionality
+  * Unfilled dimensions default to 0.0 */
 class Vector {
 	double x = 0;
 	double y = 0;

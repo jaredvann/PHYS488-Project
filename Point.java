@@ -1,4 +1,7 @@
 
+/** Class that describes a point in space
+  * 0-3 parameters can be passed depending on dimentionality
+  * Unfilled dimensions default to 0.0 */
 class Point {
 	double x = 0;
 	double y = 0;

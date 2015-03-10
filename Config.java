@@ -1,6 +1,8 @@
 import java.util.Properties;
 import java.io.*;
 
+/** Class that is used to import configuration files
+  * See TestConfig.java for example on how to use */
 class Config {
 
 	String filepath;
