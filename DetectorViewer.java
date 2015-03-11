@@ -10,19 +10,15 @@ import javafx.stage.Stage;
 
 public class DetectorViewer extends Application {
 
-	int width = 800;
-	int height = 800;
+	public int width = 800;
+	public int height = 800;
 
-	double radius = 1000;
-	double scale_factor;
+	public double radius = 1000;
+	private double scale_factor;
 
 	private double PI2 = Math.PI/2;
 
-	static Color WHITE = new Color(1,1,1,1);
-	static Color BLACK = new Color(0,0,0,1);
-
 	static public ArrayList<Layer> layers = new ArrayList<Layer>();
-	// static public ArrayList<> tracks = new ArrayList<double[]>();
 	static public ArrayList<PTrack> particle_tracks = new ArrayList<PTrack>();
 
 	static public double[][] event_angles;
@@ -32,55 +28,43 @@ public class DetectorViewer extends Application {
 	}
 
 	public static void main(String[] args) {
-
-		// Setup materials
 		double[] beryllium = {35};
 		double[] silicon = {45, 80, 120, 180, 300, 400, 500, 700};
 		double[] coincidence = {900, 910};
 
 		for (double r : beryllium)
-			layers.add(new Layer(r, r+6, new Color(1, 0, 0, 1)));
+			layers.add(new Layer(r, r+6, Color.RED));
 
 		for (double r : silicon)
-			layers.add(new Layer(r, r+2, new Color(0, 1, 0, 1)));
+			layers.add(new Layer(r, r+2, Color.GREEN));
 
 		for (double r : coincidence)
-			layers.add(new Layer(r, r+2, new Color(0, 0, 1, 1)));
-
-
+			layers.add(new Layer(r, r+2, Color.BLUE));
 
 		double[] points = {0, 0, 0.05, 0.1, 0.2, 0.3, 0.38, 0.44, 0.55, 0.68, 0.685};
 
 		PTrack track = new PTrack();
-		for (int i = 0; i < layers.size(); i++) {
+		for (int i = 0; i < layers.size(); i++)
 			track.addPoint(new PPoint(layers.get(i).radius, points[i]));
-		}
 
 		particle_tracks.add(track);
-
-
 
 		double[][] event_angles = {
 			{},{0},{0.05},{0.1},{0.2},{0.3},{0.38},{0.44},{0.55},{0.68},{0.685}
 		};
 
-		for (int i = 0; i < layers.size(); i++) {
-			for (int j = 0; j < event_angles[i].length; j++) {
+		for (int i = 0; i < layers.size(); i++)
+			for (int j = 0; j < event_angles[i].length; j++)
 				layers.get(i).c_points.add(new CollisionPoint(event_angles[i][j]));
-			}
-		}
 
 		launch(args);
 	}
 
 	@Override
 	public void start(Stage stage) {
-
 		Group root = new Group();
 		Canvas canvas = new Canvas(width, height);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-
-
 
 		drawDetector(gc);
 		drawTracks(gc);
@@ -92,7 +76,6 @@ public class DetectorViewer extends Application {
 		stage.show();
 	}
 
-
 	private void drawDetector(GraphicsContext gc) {
 		double r;
 
@@ -102,11 +85,10 @@ public class DetectorViewer extends Application {
 			gc.fillOval(width/2-r, height/2-r, r*2, r*2);
 
 			r = layers.get(i).inner_radius * scale_factor;
-			gc.setFill(WHITE);
+			gc.setFill(Color.WHITE);
 			gc.fillOval(width/2-r, height/2-r, r*2, r*2);
 		}
 	}
-
 
 	private void drawCollisionPoints(GraphicsContext gc) {
 		double r; double r2 = 4;
@@ -125,20 +107,15 @@ public class DetectorViewer extends Application {
 		}
 	}
 
-
 	private void drawTracks(GraphicsContext gc){
-		double r, a;
-		double x1, x2, y1, y2;
+		double r, a, x1, x2, y1, y2;
 
 		gc.setStroke(Color.PURPLE);
 		gc.setLineWidth(1);
 
 		for (PTrack track : particle_tracks) {
-			a = track.points.get(0).radius;
-			r = track.points.get(0).radius * scale_factor;
-
 			x2 = width/2;
-			y2 = width/2;
+			y2 = height/2;
 
 			for(int i = 0; i < track.points.size(); i++) {
 				r = track.points.get(i).radius * scale_factor;
@@ -155,17 +132,16 @@ public class DetectorViewer extends Application {
 		}
 	}
 
-
 	private Color randomColor() {
 		return new Color(Math.random(), Math.random(), Math.random(), 1.0);
 	}
-
 }
 
 
 class PTrack {
-	ArrayList<PPoint> points = new ArrayList<PPoint>();
-	Color color = new Color(0.5, 0.5, 0.5, 1.0);
+
+	public ArrayList<PPoint> points = new ArrayList<PPoint>();
+	public Color color = Color.GREY;
 
 	public void addPoint(PPoint p) {
 		points.add(p);
@@ -173,13 +149,21 @@ class PTrack {
 }
 
 
+class CollisionPoint {
+
+	public double angle;
+
+	public CollisionPoint (double a) {
+		this.angle = a;
+	}
+}
+
+
 class Layer {
 
-	double inner_radius, outer_radius, radius;
-
-	Color color = new Color(0.5, 0.5, 0.5, 1.0);
-
-	ArrayList<CollisionPoint> c_points = new ArrayList<CollisionPoint>();
+	public double inner_radius, outer_radius, radius;
+	public Color color = Color.GREY;
+	public ArrayList<CollisionPoint> c_points = new ArrayList<CollisionPoint>();
 
 	public Layer(double inner_radius, double outer_radius) {
 		this.inner_radius = inner_radius;
