@@ -24,3 +24,14 @@ class Point {
 		this.z = z;
 	}
 }
+
+class PPoint {
+	double r = 0;
+	double a = 0;
+
+	public PPoint(double r, double a) {
+		this.r = r;
+		this.a = a;
+	}
+
+}

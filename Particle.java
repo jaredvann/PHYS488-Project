@@ -1,20 +1,19 @@
 
 class Particle {
 	double mass, momentum, angle, age;
-	Point position;
-	Vector direction;
-	
+	PPoint position;
+
 	public Particle(
 		double mass,
 		double momentum,
-		Point position,
-		Vector direction,
+		PPoint position,
+		double angle,
 		double age
 	) {
 		this.mass = mass;
 		this.momentum = momentum;
 		this.position = position;
-		this.direction = direction;
+		this.angle = angle;
 		this.age = age;
 	}
 }
