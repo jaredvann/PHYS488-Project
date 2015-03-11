@@ -3,8 +3,6 @@ class Particle {
 	double mass, momentum, angle, age;
 	Point position;
 	Vector direction;
-	Point position;
-
 
 	public Particle(
 		double mass,
