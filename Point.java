@@ -26,12 +26,12 @@ class Point {
 }
 
 class PPoint {
-	double r = 0;
-	double a = 0;
+	double radius = 0;
+	double angle = 0;
 
 	public PPoint(double r, double a) {
-		this.r = r;
-		this.a = a;
+		this.radius = r;
+		this.angle = a;
 	}
 
 }
