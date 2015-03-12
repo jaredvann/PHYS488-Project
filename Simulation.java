@@ -5,15 +5,14 @@ import java.io.PrintWriter;
  * Let's get our simulation on!
  */
 public class Simulation {
-    private static final screen = new PrintWriter(System.out);
-    private static final config = new Config("simulation");
+    private static final PrintWriter screen = new PrintWriter(System.out);
 
     private static CoincidenceDetector cd;
-    
+
     private static MuonFactory factory;
     private static double[][] muons;
 
-    public static boolean run(double[2] muon) {
+    public static boolean run(double[] muon) {
 
         // Get angles at the two coincidence detectors
         // ---For reference: see final page of project handout
