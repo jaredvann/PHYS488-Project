@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-class Detector implements Handler {
+class Detector {
 
 	private ArrayList<DetectorEvent> events = new ArrayList<DetectorEvent>();
 

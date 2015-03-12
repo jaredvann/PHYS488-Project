@@ -1,7 +1,7 @@
 
 /** Class to calculate the trajectory of a particle in a magnetic field
   * through empty space */
-class Trajectory implements Handler {
+class Trajectory {
 	double depth;
 	Field field;
 
