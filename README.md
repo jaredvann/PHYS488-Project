@@ -55,7 +55,7 @@ class Trajectory {
 /** Estimates whether the Muon is high or low momentum. Is given the two 
 angles that the Muon intersects the two coincidence detectors and returns 
 an estimate of whether the Muon is has high or low momentum. */
-static class CoincidenceDetector {
+class CoincidenceDetector {
 	private double radius_1;
 	private double radius_2;
 
