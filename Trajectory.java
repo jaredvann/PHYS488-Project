@@ -18,21 +18,21 @@ public double getYPrime(double dRadius, double momentum ){
 
 public double getX(double momentum, double theta, double dRadius){
 
-    return getXPrime(dRadius, momentum)*Math.cos(theta)-getYPrime(dRadius, momentum)*Math.sin(theta);
+    return getXPrime(dRadius, momentum)*Math.cos(theta) - getYPrime(dRadius, momentum)*Math.sin(theta);
 
 
 }
 
 public double getY(double momentum, double theta, double dRadius){
 
-    return getYPrime(dRadius, momentum)*Math.cos(theta)+getXPrime(dRadius, momentum)*Math.sin(theta);
+    return getYPrime(dRadius, momentum)*Math.cos(theta) - getXPrime(dRadius, momentum)*Math.sin(theta);
 
 
 }
 
 public double getAngle(double momentum, double theta0, double dRadius){
     double theta = Math.PI/2 - theta0;
-    return Math.atan2(getY(momentum, theta, dRadius),getX(momentum, theta, dRadius));
+    return Math.atan2(getY(momentum, theta, dRadius), getX(momentum, theta, dRadius));
 }
 
 }
