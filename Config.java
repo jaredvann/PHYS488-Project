@@ -6,8 +6,7 @@ class Config {
 	static Properties config = new Properties();
 
 	public Config(String fp) throws IOException {
-		fp = "config/" + fp + ".properties";
-		FileInputStream file = new FileInputStream(new File(fp));
+		FileInputStream file = new FileInputStream(new File("config/" + fp + ".properties"));
 		config.load(file);
 		file.close();
 	}
