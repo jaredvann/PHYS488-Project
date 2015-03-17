@@ -24,8 +24,11 @@ class CoincidenceDetector {
 		// Find delta angle
 		double delta = Math.atan(radius2*(angleAtA - angleAtB)/thickness);
 
+		//Find radius of particle trajectory
+		double r = 2*delta; //TODO - check this
+
 		// Estimate momentum
-		double momentum = 0.3*mag_field*midradius/(2*delta);
+		double momentum = 0.3*mag_field*r/(2*delta);
 
 		// Return whether momentum is in accepted range
 		return (momentum > min_momentum || momentum < max_momentum);
