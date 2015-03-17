@@ -26,16 +26,20 @@ class CoincidenceDetector {
 	}
 
 	public boolean estimateMomentum(double angleAtA, double angleAtB) {
-		// Find delta angle
-		double delta = Math.atan(radiusB*(angleAtA - angleAtB)/thickness);
+		System.out.println("A: " + angleAtA);
+		System.out.println("B: " + angleAtB);
 
-		//Find radius of particle trajectory
-		double r = 2*delta; //TODO - check this
+		// Find delta angle
+		double delta = Math.atan(radiusB*(angleAtB - angleAtA)/thickness);
 
 		// Estimate momentum
-		double momentum = 0.3*mag_field*r/(2*delta);
+		double momentum = 0.3*mag_field*midradius/(2*delta);
+
+		System.out.println("Delta: " + delta);
+
+		System.out.println("Predicted momentum: " + momentum);
 
 		// Return whether momentum is in accepted range
-		return (momentum > min_momentum || momentum < max_momentum);
+		return (momentum > min_momentum && momentum < max_momentum);
 	}
 }

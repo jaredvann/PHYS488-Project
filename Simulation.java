@@ -8,7 +8,7 @@ import java.io.IOException;
  * Let's get our simulation on!
  */
 public class Simulation {
-    private static final PrintWriter screen = new PrintWriter(System.out);
+    private static PrintWriter screen = new PrintWriter(System.out, true);
     private static Config config;
 
     private static CoincidenceDetector cd;
@@ -36,12 +36,14 @@ public class Simulation {
 
     public static void main(String[] args) throws IOException {
 
+        screen.println(1);
+
         config = new Config("main");
 
         // Set up the Coincidence Detector (it needs the radii)
         cd = new CoincidenceDetector(
             config.getDouble("coincidenceDetectorRadiusA"),
-            config.getDouble("coincidenceDetectorRadiusA"));
+            config.getDouble("coincidenceDetectorRadiusB"));
 
         // How many muons should we simulate?
         int count = 1;
@@ -69,11 +71,14 @@ public class Simulation {
             //     muon = layer.handle(muon);
 
             // If we are using a Coincidence Detector then hand it over!
+
+            screen.println("Actual momentum: " + muon[1]);
+
             if (cd != null)
                 if (trigger(muon))
-                    screen.println("[*] Muon " + (i+1) + " has high momentum!");
+                    screen.println("[*] Muon " + (i+1) + " has momentum within bounds!");
                 else
-                    screen.println("[*] Muon " + (i+1) + " has low momentum!");
+                    screen.println("[*] Muon " + (i+1) + " has momentum out of bounds!");
         }
     }
 }

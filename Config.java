@@ -7,7 +7,7 @@ class Config {
 
 	public Config(String fp) throws IOException {
 		try {
-			FileInputStream file = new FileInputStream(new File("config/" + fp + ".properties"));
+			FileInputStream file = new FileInputStream(new File("./config/" + fp + ".properties"));
 			config.load(file);
 			file.close();
 		} catch (IOException e) {
