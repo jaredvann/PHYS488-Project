@@ -2,29 +2,31 @@
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.IOException;
 
 /**
  * Let's get our simulation on!
  */
 public class Simulation {
     private static final PrintWriter screen = new PrintWriter(System.out);
-    private static final Config config = new Config("main");
+    private static Config config;
 
     private static CoincidenceDetector cd;
-    private static List<Layer> layers;
 
     private static double[] masses;
     private static ParticleFactory factory;
 
     private static double[][] muons;
 
+    private static Trajectory trajectory;
+
     public static boolean trigger(double[] muon) {
 
         // Get angles at the two coincidence detectors
         // ---For reference: see final page of project handout
         //                   these are the angles phi_9A and phi_9B
-        double angleAtA = Trajectory.run(muon, cd.radiusA);
-        double angleAtB = Trajectory.run(muon, cd.radiusB);
+        double angleAtA = trajectory.getAngle(muon[0], muon[1], cd.radiusA);
+        double angleAtB = trajectory.getAngle(muon[0], muon[1], cd.radiusB);
 
         // Is this particle high or not?
         boolean amIHigh = cd.estimateMomentum(angleAtA, angleAtB);
@@ -32,8 +34,9 @@ public class Simulation {
         return amIHigh;
     }
 
-    public static void main(String[] args) {
-        layers = new ArrayList<Layer>();
+    public static void main(String[] args) throws IOException {
+
+        config = new Config("main");
 
         // Set up the Coincidence Detector (it needs the radii)
         cd = new CoincidenceDetector(
@@ -48,16 +51,18 @@ public class Simulation {
         muons = new double[count][2];
 
         masses = new double[] { 106 };
-        factory = new MuonFactory(
+        factory = new ParticleFactory(
             config.getDouble("minMomentum"),
             config.getDouble("maxMomentum"),
             masses);
+
+        trajectory = new Trajectory(config.getDouble("magField"));
 
         // Run a simulation for each of the muons
         double[] muon = new double[2];
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
-            muon = muons[i] = factory.newMuon();
+            muon = muons[i] = factory.newParticle();
 
             // Send the muon through all the layers in the accelerator
             // for (Layer layer : layers)

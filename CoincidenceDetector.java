@@ -1,14 +1,19 @@
+import java.io.IOException;
 
 class CoincidenceDetector {
 
-	private Config config = new Config("main");
+	private Config config;
 
-	private double radius1, radius2, thickness, midradius;
+	public double radiusA, radiusB, thickness, midradius;
 	private double momentum_split, mag_field;
 
-	public CoincidenceDetector(double radius1, double radius2) {
-		this.radius1 = radius1;
-		this.radius2 = radius2;
+	private double min_momentum, max_momentum;
+
+	public CoincidenceDetector(double radiusA, double radiusB) throws IOException {
+		this.radiusA = radiusA;
+		this.radiusB = radiusB;
+
+		this.config = new Config("main");
 
 		mag_field = config.getDouble("magField");
 
@@ -16,13 +21,13 @@ class CoincidenceDetector {
 		max_momentum = config.getDouble("coincidenceMaxMomentum");
 
 		// These calculations only have to be done once
-		thickness = radius2 - radius1;
-		midradius = (radius1 + radius2)/2;
+		thickness = radiusB - radiusA;
+		midradius = (radiusA + radiusB)/2;
 	}
 
 	public boolean estimateMomentum(double angleAtA, double angleAtB) {
 		// Find delta angle
-		double delta = Math.atan(radius2*(angleAtA - angleAtB)/thickness);
+		double delta = Math.atan(radiusB*(angleAtA - angleAtB)/thickness);
 
 		//Find radius of particle trajectory
 		double r = 2*delta; //TODO - check this

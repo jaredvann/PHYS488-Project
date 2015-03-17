@@ -6,9 +6,13 @@ class Config {
 	static Properties config = new Properties();
 
 	public Config(String fp) throws IOException {
-		FileInputStream file = new FileInputStream(new File("config/" + fp + ".properties"));
-		config.load(file);
-		file.close();
+		try {
+			FileInputStream file = new FileInputStream(new File("config/" + fp + ".properties"));
+			config.load(file);
+			file.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String get(String key) {
