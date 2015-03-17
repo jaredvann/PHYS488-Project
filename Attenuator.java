@@ -3,7 +3,7 @@ class Attenuator {
 
 	public int atomicNumber;
 	public double massNumber, density;
-	public double mcsPreCalc, eLossPreCalc, inertiaMoment, two_me_over_iM;
+	public double mcsPreCalc, eLossPreCalc, two_me_over_iM;
 
 	public Attenuator (int atomicNumber, double massNumber, double density, double stepSize) {
 		this.atomicNumber = atomicNumber;

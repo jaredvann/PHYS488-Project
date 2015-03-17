@@ -10,8 +10,10 @@ class CoincidenceDetector {
 		this.radius1 = radius1;
 		this.radius2 = radius2;
 
-		momentum_split = config.getDouble("coincidence_detector_momentum_highlow_split");
-		mag_field = config.getDouble("mag_field");
+		mag_field = config.getDouble("magField");
+
+		min_momentum = config.getDouble("coincidenceMinMomentum");
+		max_momentum = config.getDouble("coincidenceMaxMomentum");
 	}
 
 	public boolean estimateMomentum(double angleAtA, double angleAtB) {
@@ -19,12 +21,12 @@ class CoincidenceDetector {
 		// Estimate whether momentum is high or low from delta angle
 
 		// Delta angle
-		double delta = Math.atan(radius2*(anglesAtA - anglesAtB)/(radius2 - radius1));
+		double delta = Math.atan(radius2*(angleAtA - angleAtB)/(radius2 - radius1));
 
 		// Estimated momentum
 		double momentum = 0.3*mag_field*((radius1+radius2)/2)/(2*delta);
 
 		// Return high low momentum
-		return (momentum >= momentum_split);
+		return ((momentum > min_momentum) || (momentum < max_momentum));
 	}
 }
