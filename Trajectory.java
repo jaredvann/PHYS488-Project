@@ -30,7 +30,8 @@ public double getY(double momentum, double theta, double dRadius){
 
 }
 
-public double getAngle(double momentum, double theta, double dRadius){
+public double getAngle(double momentum, double theta0, double dRadius){
+    double theta = Math.PI/2 - theta0;
     return Math.atan2(getY(momentum, theta, dRadius),getX(momentum, theta, dRadius));
 }
 
