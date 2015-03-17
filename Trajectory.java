@@ -8,12 +8,12 @@ class Trajectory {
      return -1*Math.pow(dRadius,2)/(2*getRadius(momentum));
  }
 
-private double getRadius(double momentum){ //getTadius=d
+private double getRadius(double momentum){ //getRadius=d
     return momentum/(0.3*field);
     
 }
 public double getYPrime(double dRadius, double momentum ){
-    return Math.sqrt(Math.pow(dRadius,2)-(Math.pow(getXPrime(dRadius, momentum),2));
+    return Math.sqrt(Math.pow(dRadius,2)-(Math.pow(getXPrime(dRadius, momentum),2)));
 }
 
 public double getX(double momentum, double theta, double dRadius){
