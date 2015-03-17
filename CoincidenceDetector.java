@@ -22,12 +22,9 @@ class CoincidenceDetector {
 		double delta = Math.atan(radius2*(anglesAtA - anglesAtB)/(radius2 - radius1));
 
 		// Estimated momentum
-		double momentum = 0.3*mag_field*((radius1+radius2)/2)/(2*delta) //CHECK RADIUS VALUE
+		double momentum = 0.3*mag_field*((radius1+radius2)/2)/(2*delta);
 
 		// Return high low momentum
-		if (momentum >= momentum_split)
-			return true;
-		else
-			return false;
+		return (momentum >= momentum_split);
 	}
 }
