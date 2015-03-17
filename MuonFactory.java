@@ -30,7 +30,7 @@ public class MuonFactory{
         }
 
     //double[] = {theta, momentum}
-    public double[] newmuon()  {
+    public double[] newMuon()  {
         double [2] muon ={muonAngle() ,muonMomentum() };
         return muon;
     }
