@@ -5,7 +5,7 @@ class Trajectory {
     }
 
  public double getXPrime(double dRadius, double momentum){
-     return -1*Math.pow(dRadius,2)/(2*getRadius(momentum));
+     return Math.pow(dRadius,2)/(2*getRadius(momentum));
  }
 
 private double getRadius(double momentum){ //getRadius=d
