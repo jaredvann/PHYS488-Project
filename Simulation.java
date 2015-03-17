@@ -41,9 +41,7 @@ public class Simulation {
         config = new Config("main");
 
         // Set up the Coincidence Detector (it needs the radii)
-        cd = new CoincidenceDetector(
-            config.getDouble("coincidenceDetectorRadiusA"),
-            config.getDouble("coincidenceDetectorRadiusB"));
+        cd = new CoincidenceDetector();
 
         // How many muons should we simulate?
         int count = 1;

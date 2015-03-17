@@ -29,7 +29,7 @@ class ParticleFactory {
 	//double[] = {mass, momentum, theta}
 	public static double[] newParticle() {
 		double mass = masses[random.nextInt(masses.length)];
-		double momentum = random.nextDouble()*(maxP-minP) + minP + mass;
+		double momentum = random.nextDouble()*(maxP-minP) + minP;
 		double theta = random.nextDouble()*Math.PI*2;
 
 		double[] particle = {mass, momentum, theta};

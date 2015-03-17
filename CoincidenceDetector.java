@@ -9,16 +9,16 @@ class CoincidenceDetector {
 
 	private double min_momentum, max_momentum;
 
-	public CoincidenceDetector(double radiusA, double radiusB) throws IOException {
-		this.radiusA = radiusA;
-		this.radiusB = radiusB;
-
+	public CoincidenceDetector() throws IOException {
 		this.config = new Config("main");
 
 		mag_field = config.getDouble("magField");
 
 		min_momentum = config.getDouble("coincidenceMinMomentum");
 		max_momentum = config.getDouble("coincidenceMaxMomentum");
+
+		radiusA = config.getDouble("coincidenceDetectorRadiusA"),
+		radiusB = config.getDouble("coincidenceDetectorRadiusB")
 
 		// These calculations only have to be done once
 		thickness = radiusB - radiusA;
@@ -30,7 +30,7 @@ class CoincidenceDetector {
 		System.out.println("B: " + angleAtB);
 
 		// Find delta angle
-		double delta = Math.atan(radiusB*(angleAtB - angleAtA)/thickness);
+		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/thickness));
 
 		// Estimate momentum
 		double momentum = 0.3*mag_field*midradius/(2*delta);
