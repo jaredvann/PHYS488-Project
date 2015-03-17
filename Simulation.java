@@ -15,7 +15,7 @@ public class Simulation {
 
     private static double[] masses;
     private static ParticleFactory factory;
-    
+
     private static double[][] muons;
 
     public static boolean trigger(double[] muon) {
@@ -47,7 +47,7 @@ public class Simulation {
         // Initialize the muon array and get a new MuonFactory instance
         muons = new double[count][2];
 
-        masses = new double[1] { 106 };
+        masses = new double[] { 106 };
         factory = new MuonFactory(
             config.getDouble("minMomentum"),
             config.getDouble("maxMomentum"),
