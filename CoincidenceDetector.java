@@ -3,7 +3,7 @@ class CoincidenceDetector {
 
 	private Config config = new Config("main");
 
-	private double radius1, radius2;
+	private double radius1, radius2, thickness, midradius;
 	private double momentum_split, mag_field;
 
 	public CoincidenceDetector(double radius1, double radius2) {
@@ -14,19 +14,20 @@ class CoincidenceDetector {
 
 		min_momentum = config.getDouble("coincidenceMinMomentum");
 		max_momentum = config.getDouble("coincidenceMaxMomentum");
+
+		// These calculations only have to be done once
+		thickness = radius2 - radius1;
+		midradius = (radius1 + radius2)/2;
 	}
 
 	public boolean estimateMomentum(double angleAtA, double angleAtB) {
-		// Calculate delta angle from two position angles
-		// Estimate whether momentum is high or low from delta angle
+		// Find delta angle
+		double delta = Math.atan(radius2*(angleAtA - angleAtB)/thickness);
 
-		// Delta angle
-		double delta = Math.atan(radius2*(angleAtA - angleAtB)/(radius2 - radius1));
+		// Estimate momentum
+		double momentum = 0.3*mag_field*midradius/(2*delta);
 
-		// Estimated momentum
-		double momentum = 0.3*mag_field*((radius1+radius2)/2)/(2*delta);
-
-		// Return high low momentum
-		return ((momentum > min_momentum) || (momentum < max_momentum));
+		// Return whether momentum is in accepted range
+		return (momentum > min_momentum || momentum < max_momentum);
 	}
 }
