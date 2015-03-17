@@ -5,18 +5,14 @@ class ParticleFactory {
 
 	static Random random = new Random();
 
-	static double[] masses = {
-		0.511,		// Electron
-		1.777E03,	// Tau
-		91.2E03,	// Z Boson
-		80.4E03		// W Boson
-	};
+	static double[] masses;
 
 	static double minP, maxP, nextP;
 
-	public ParticleFactory(double minP, double maxP)  {
+	public ParticleFactory(double minP, double maxP, double[] masses)  {
 		this.minP = minP;
 		this.maxP = maxP;
+		this.masses = masses;
 	}
 
 	public static void main(String[] args) {
