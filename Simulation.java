@@ -13,7 +13,9 @@ public class Simulation {
     private static CoincidenceDetector cd;
     private static List<Layer> layers;
 
-    private static MuonFactory factory;
+    private static double[] masses;
+    private static ParticleFactory factory;
+    
     private static double[][] muons;
 
     public static boolean trigger(double[] muon) {
@@ -32,7 +34,7 @@ public class Simulation {
 
     public static void main(String[] args) {
         layers = new ArrayList<Layer>();
-        
+
         // Set up the Coincidence Detector (it needs the radii)
         cd = new CoincidenceDetector(
             config.getDouble("coincidenceDetectorRadiusA"),
@@ -44,9 +46,12 @@ public class Simulation {
 
         // Initialize the muon array and get a new MuonFactory instance
         muons = new double[count][2];
+
+        masses = new double[1] { 106 };
         factory = new MuonFactory(
             config.getDouble("minMomentum"),
-            config.getDouble("maxMomentum"));
+            config.getDouble("maxMomentum"),
+            masses);
 
         // Run a simulation for each of the muons
         double[] muon = new double[2];
