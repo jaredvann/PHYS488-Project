@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.IOException;
 
+import histogram.Histogram;
+
 /**
  * Let's get our simulation on!
  */
@@ -15,8 +17,9 @@ public class Simulation {
 
     private static double[] masses;
     private static ParticleFactory factory;
-
     private static double[][] muons;
+
+    private static Histogram momenta;
 
     private static Trajectory trajectory;
 
@@ -52,6 +55,8 @@ public class Simulation {
             config.getDouble("maxMomentum"),
             masses);
 
+        momenta = new Histogram(config.getDouble("minMomentum"), config.getDouble("maxMomentum"));
+
         trajectory = new Trajectory(config.getDouble("magField"));
 
         // Run a simulation for each of the muons
@@ -59,6 +64,7 @@ public class Simulation {
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
             muon = muons[i] = factory.newParticle();
+            momenta.add(muon[1]);
 
             // Send the muon through all the layers in the accelerator
             // for (Layer layer : layers)
