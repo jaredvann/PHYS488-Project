@@ -19,11 +19,15 @@ public class Simulation {
     private static ParticleFactory factory;
     private static double[][] muons;
 
+<<<<<<< HEAD
     private static Histogram momenta;
+=======
+    private static double momentum, cdMinMomentum, cdMaxMomentum;
+>>>>>>> origin/master
 
     private static Trajectory trajectory;
 
-    public static boolean trigger(double[] muon) {
+    public static double trigger(double[] muon) {
         // Get angles at the two coincidence detectors
         // ---For reference: see final page of project handout
         //                   these are the angles phi_9A and phi_9B
@@ -31,9 +35,9 @@ public class Simulation {
         double angleAtB = trajectory.getAngles(muon[1], muon[2], cd.radiusB)[0];
 
         // Is this particle high or not?
-        boolean amIHigh = cd.estimateMomentum(angleAtA, angleAtB);
+        double mom = cd.estimateMomentum(angleAtA, angleAtB);
 
-        return amIHigh;
+        return mom;
     }
 
     public static void main(String[] args) throws IOException {
@@ -59,6 +63,9 @@ public class Simulation {
 
         trajectory = new Trajectory(config.getDouble("magField"));
 
+        cdMinMomentum = config.getDouble("coincidenceMinMomentum");
+		cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
+
         // Run a simulation for each of the muons
         double[] muon = new double[2];
         for (int i = 0; i < count; i++) {
@@ -72,10 +79,15 @@ public class Simulation {
 
             // If we are using a Coincidence Detector then hand it over!
 
-            screen.println("Actual momentum: " + muon[1]);
+            screen.println("[*] Actual momentum: " + muon[1]);
 
             if (cd != null)
-                if (trigger(muon))
+
+                momentum = trigger(muon);
+
+                screen.println("[*] Predicted momentum: " + momentum);
+
+                if (momentum > cdMinMomentum && momentum < cdMaxMomentum)
                     screen.println("[*] Muon " + (i+1) + " has momentum within bounds!");
                 else
                     screen.println("[*] Muon " + (i+1) + " has momentum out of bounds!");
