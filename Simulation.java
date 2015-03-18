@@ -18,12 +18,9 @@ public class Simulation {
     private static double[] masses;
     private static ParticleFactory factory;
     private static double[][] muons;
-
-<<<<<<< HEAD
     private static Histogram momenta;
-=======
+
     private static double momentum, cdMinMomentum, cdMaxMomentum;
->>>>>>> origin/master
 
     private static Trajectory trajectory;
 
