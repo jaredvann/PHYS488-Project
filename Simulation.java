@@ -24,8 +24,8 @@ public class Simulation {
         // Get angles at the two coincidence detectors
         // ---For reference: see final page of project handout
         //                   these are the angles phi_9A and phi_9B
-        double angleAtA = trajectory.getAngle1(muon[1], muon[2], cd.radiusA);
-        double angleAtB = trajectory.getAngle1(muon[1], muon[2], cd.radiusB);
+        double angleAtA = trajectory.getAngle1(muon[1], muon[2], cd.radiusA)[0];
+        double angleAtB = trajectory.getAngle1(muon[1], muon[2], cd.radiusB)[0];
 
         // Is this particle high or not?
         boolean amIHigh = cd.estimateMomentum(angleAtA, angleAtB);
