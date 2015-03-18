@@ -128,7 +128,7 @@ public class AdaptiveStorage extends HistogramStorage {
 
     // Export methods
     public String toCsv() {
-        String csv = "bin_centre,bin_width,bin_count,bin_density,bin_unit_density\n";
+        String csv = "bin_centre,bin_width,bin_count,bin_unit_density\n";
 
         for (Tree<Bin> f : tree) {
             Bin bin = f.getValue();

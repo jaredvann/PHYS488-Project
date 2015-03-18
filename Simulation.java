@@ -44,8 +44,7 @@ public class Simulation {
         cd = new CoincidenceDetector();
 
         // How many muons should we simulate?
-        int count = 1;
-        // int count = config.getInt("numberOfParticles");
+        int count = config.getInt("numParticles");
 
         // Initialize the muon array and get a new MuonFactory instance
         muons = new double[count][2];
@@ -69,6 +68,8 @@ public class Simulation {
             // We'll remember the original muon details for safe-keeping
             muon = muons[i] = factory.newParticle();
             momenta.add(muon[1]);
+
+            momenta.writeToDisk("./tmp.csv");
 
             // Send the muon through all the layers in the accelerator
             // for (Layer layer : layers)
