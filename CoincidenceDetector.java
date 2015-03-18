@@ -24,10 +24,7 @@ class CoincidenceDetector {
 		// Find delta angle
 		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/thickness));
 
-		// Estimate momentum
-		double momentum = 0.3*mag_field*midradius/(2*delta);
-
-		// Return momentum
-		return momentum;
+		// Estimate and return momentum
+		return 0.3*mag_field*midradius/(2*delta);
 	}
 }

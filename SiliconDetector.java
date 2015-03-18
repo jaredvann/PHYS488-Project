@@ -18,7 +18,7 @@ public class SiliconDetector extends Layer {
 
     public double[] handle(double[] particle) {
         for (int i = 0; i < stepSize; i++) {
-            particle[1] -= attn.getEnergyLoss(particle[1]);
+            particle[1] -= attn.getEnergyLoss(particle[0], particle[1]);
 
             if (particle[1] <= 0) {
                 particle[1] = 0;

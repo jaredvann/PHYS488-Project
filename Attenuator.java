@@ -24,7 +24,7 @@ class Attenuator {
 		two_me_over_iM = 2 * Helpers.MASS_ELECTRON / (0.0000135 * atomicNumber);
 	}
 
-	public double getEnergyLoss(double momentum, double mass) {
+	public double getEnergyLoss(double mass, double momentum) {
 		double m_e = Helpers.MASS_ELECTRON;
 
 		double b2 = Math.pow(Helpers.beta(mass, momentum), 2); // Beta(p)^2

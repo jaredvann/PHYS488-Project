@@ -12,12 +12,12 @@ public abstract class Layer {
 
     public abstract double[] handle(double[] particle);
 
-    public double getName() { return name; }
-    public double setName(String name) { this.name = name; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public double getDistance() { return distance; }
-    public double setDistance(double distance) { this.distance = distance; }
+    public void setDistance(double distance) { this.distance = distance; }
 
     public double getThickness() { return thickness; }
-    public double setThickness(double thickness) { this.thickness = thickness; }
+    public void setThickness(double thickness) { this.thickness = thickness; }
 }
