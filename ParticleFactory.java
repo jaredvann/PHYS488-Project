@@ -32,7 +32,7 @@ class ParticleFactory {
 		double momentum = random.nextDouble()*(maxP-minP) + minP;
 		double theta = random.nextDouble()*Math.PI*2;
 
-		double[] particle = {mass, momentum, theta};
+		double[] particle = { mass, momentum, theta };
 		return particle;
 	}
 }

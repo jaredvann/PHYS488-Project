@@ -17,12 +17,12 @@ class CoincidenceDetector {
 		min_momentum = config.getDouble("coincidenceMinMomentum");
 		max_momentum = config.getDouble("coincidenceMaxMomentum");
 
-		radiusA = config.getDouble("coincidenceDetectorRadiusA"),
-		radiusB = config.getDouble("coincidenceDetectorRadiusB")
+		radiusA = config.getDouble("coincidenceDetectorRadiusA");
+		radiusB = config.getDouble("coincidenceDetectorRadiusB");
 
 		// These calculations only have to be done once
 		thickness = radiusB - radiusA;
-		midradius = (radiusA + radiusB)/2;
+		midradius = radiusA + thickness/2;
 	}
 
 	public boolean estimateMomentum(double angleAtA, double angleAtB) {

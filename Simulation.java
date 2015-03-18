@@ -21,12 +21,11 @@ public class Simulation {
     private static Trajectory trajectory;
 
     public static boolean trigger(double[] muon) {
-
         // Get angles at the two coincidence detectors
         // ---For reference: see final page of project handout
         //                   these are the angles phi_9A and phi_9B
-        double angleAtA = trajectory.getAngle(muon[0], muon[1], cd.radiusA);
-        double angleAtB = trajectory.getAngle(muon[0], muon[1], cd.radiusB);
+        double angleAtA = trajectory.getAngle1(muon[1], muon[2], cd.radiusA);
+        double angleAtB = trajectory.getAngle1(muon[1], muon[2], cd.radiusB);
 
         // Is this particle high or not?
         boolean amIHigh = cd.estimateMomentum(angleAtA, angleAtB);
@@ -35,9 +34,6 @@ public class Simulation {
     }
 
     public static void main(String[] args) throws IOException {
-
-        screen.println(1);
-
         config = new Config("main");
 
         // Set up the Coincidence Detector (it needs the radii)
