@@ -26,7 +26,8 @@ class Trajectory {
         double[] solutions = new double[2];
 
         double theta = Math.PI/2 - theta0;
-        double xPrime = getXPrime(momentum, theta);
+        double xPrime = getXPrime(momentum, dRadius);
+        System.out.println(xPrime);
         double yPrime = getYPrime(xPrime, dRadius)[0];
 
         solutions[0] = getAngle(getY(xPrime, yPrime, theta), getX(xPrime, yPrime, theta));
