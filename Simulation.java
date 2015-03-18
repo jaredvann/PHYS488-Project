@@ -65,7 +65,7 @@ public class Simulation {
         int count = config.getInt("numParticles");
 
         // Initialize the muon array and get a new MuonFactory instance
-        muons = new double[count][2];
+        muons = new double[count][3];
 
         masses = new double[] { 106 };
         factory = new ParticleFactory(
@@ -81,13 +81,11 @@ public class Simulation {
 		cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
 
         // Run a simulation for each of the muons
-        double[] muon = new double[2];
+        double[] muon = new double[3];
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
             muon = muons[i] = factory.newParticle();
             momenta.add(muon[1]);
-
-            momenta.writeToDisk("./tmp.csv");
 
             // Send the muon through all the layers in the accelerator
             for (Layer layer : layers)
