@@ -11,16 +11,14 @@ import histogram.Histogram;
  * Let's get our simulation on!
  */
 public class Simulation {
-    private static PrintWriter screen = new PrintWriter(System.out, true);
+    private static PrintWriter screen;
     private static Config config;
 
     private static ParticleFactory factory;
     private static Trajectory trajectory;
     private static CoincidenceDetector cd;
 
-    private static Histogram momenta;
-
-    private static ArrayList<Layer> layers = new ArrayList<Layer>();
+    private static ArrayList<Layer> layers;
 
     private static double cdMinMomentum, cdMaxMomentum;
     private static double[] masses;
@@ -38,14 +36,28 @@ public class Simulation {
     }
 
     public static void main(String[] args) throws IOException {
-        // Setup config instance
+        // Setup Config & PrintWriter instances
+        screen = new PrintWriter(System.out, true);
         config = new Config("main");
 
-        // Set up the Coincidence Detector (it needs the radii)
-        cd = new CoincidenceDetector();
+        // Set up the Coincidence Detector
+        cd = new CoincidenceDetector(
+            config.getDouble("coincidenceDetectorRadiusA"),
+            config.getDouble("coincidenceDetectorRadiusB")
+        );
 
         // Add beam pipe layer
-        layers.add(new BeamPipe("Beam Pipe", 35, 3));
+        layers.add(
+            new AttenuatorLayer(
+                "Beam Pipe",
+                3.5,
+                3,
+                new Attenuator(4, 9.0121831, 1.85, 3/20)
+            )
+        );
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // This is hard coded BERYLLIUM properties and step sizes, need to change
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         // Radii and thickness of silicon detector layers
         double[] sdr = {4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91}; // cm
@@ -54,7 +66,11 @@ public class Simulation {
         // Add silicon detector layers
 		for (int i = 0; i < sdr.length; i++) {
 			layers.add(
-                new SiliconDetector("S-"+String.valueOf(sdr[i]), sdr[i], sdt)
+                new AttenuatorLayer(
+                    "S-"+String.valueOf(sdr[i]),
+                    sdr[i],
+                    sdt,
+                    new Attenuator(14, 28.0855, 2.3290, sdt/20))
             );
         }
 
@@ -74,8 +90,6 @@ public class Simulation {
             config.getDouble("maxMomentum"),
             masses);
 
-        momenta = new Histogram(config.getDouble("minMomentum"), config.getDouble("maxMomentum"));
-
         trajectory = new Trajectory(config.getDouble("magField"));
 
         cdMinMomentum = config.getDouble("coincidenceMinMomentum");
@@ -87,7 +101,6 @@ public class Simulation {
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
             muon = muons[i] = factory.newParticle();
-            momenta.add(muon[1]);
 
             // Send the muon through all the layers in the accelerator
             for (Layer layer : layers)
@@ -109,15 +122,23 @@ public class Simulation {
         }
     }
 
-    public static void setup() {
+    private static void setup() {
 		ArrayList<Layer> layers2 = new ArrayList<Layer>();
-		Double last_z = 0.0;
+		double last_z = 0.0;
 
         // Add vacuum layers to fill in gaps between physical layers
 		for (Layer l : layers) {
 			if (l.getDistance() > last_z) {
-				layers2.add(new VacuumLayer("V-"+String.valueOf(last_z), last_z, l.getDistance()));
-				last_z = l.getDistance() + l.getThickness();
+				layers2.add(
+                    new VacuumLayer(
+                        "V-"+String.valueOf(last_z),
+                        last_z,
+                        l.getDistance(),
+                        trajectory
+                    )
+                );
+
+                last_z = l.getDistance() + l.getThickness();
 			}
 		}
 

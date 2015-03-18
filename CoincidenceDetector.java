@@ -7,13 +7,13 @@ class CoincidenceDetector {
 	private double thickness, midradius;
 	private double momentum_split, mag_field;
 
-	public CoincidenceDetector() throws IOException {
+	public CoincidenceDetector(double radiusA, double radiusB) throws IOException {
 		this.config = new Config("main");
 
 		mag_field = config.getDouble("magField");
 
-		radiusA = config.getDouble("coincidenceDetectorRadiusA");
-		radiusB = config.getDouble("coincidenceDetectorRadiusB");
+		this.radiusA = radiusA;
+		this.radiusB = radiusB;
 
 		// These calculations only have to be done once
 		thickness = radiusB - radiusA;
