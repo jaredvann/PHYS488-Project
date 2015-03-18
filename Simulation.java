@@ -75,20 +75,20 @@ public class Simulation {
             // for (Layer layer : layers)
             //     muon = layer.handle(muon);
 
-            // If we are using a Coincidence Detector then hand it over!
-
             screen.println("[*] Actual momentum: " + muon[1]);
 
-            if (cd != null)
-
+            // If we are using a Coincidence Detector then hand it over!
+            if (cd != null) {
                 momentum = trigger(muon);
 
                 screen.println("[*] Predicted momentum: " + momentum);
 
+                // Check to see if this particle has the required momentum
                 if (momentum > cdMinMomentum && momentum < cdMaxMomentum)
-                    screen.println("[*] Muon " + (i+1) + " has momentum within bounds!");
+                    screen.println("[x] Muon " + (i+1) + " has momentum within bounds!");
                 else
-                    screen.println("[*] Muon " + (i+1) + " has momentum out of bounds!");
+                    screen.println("[!] Muon " + (i+1) + " has momentum out of bounds!");
+            }
         }
     }
 }

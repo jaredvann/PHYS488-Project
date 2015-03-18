@@ -1,7 +1,6 @@
 import java.io.IOException;
 
 class CoincidenceDetector {
-
 	private Config config;
 
 	public double radiusA, radiusB;
