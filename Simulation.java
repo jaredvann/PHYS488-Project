@@ -49,12 +49,12 @@ public class Simulation {
         layers.add(new BeamPipe("Beam Pipe", 35, 3));
 
         // Radii of silicon detector layers
-        double[] sdr = {45, 80, 120, 180, 300, 400, 500, 700, 900, 910};
+        double[] sdr = {4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91};
 
         // Add silicon detector layers
 		for (int i = 0; i < sdr.length; i++) {
 			layers.add(
-                new SiliconDetector("S-"+String.valueOf(sdr[i]), sdr[i], 0.5)
+                new SiliconDetector("S-"+String.valueOf(sdr[i]), sdr[i], 0.05)
             );
         }
 
