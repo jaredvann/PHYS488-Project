@@ -11,7 +11,9 @@ public class VacuumLayer extends Layer {
         double[] angles = getAngles(
             particle.getMomentum(),
             particle.getDirection(),
-            thickness
+            particle.getPosition(),
+            distance,
+            (distance + thickness)
         );
 
         particle.setPosition(
@@ -37,15 +39,19 @@ public class VacuumLayer extends Layer {
         return yPrime*Math.cos(theta) - xPrime*Math.sin(theta);
     }
 
-    public double[] getAngles(double momentum, double dir, double dRadius) {
+    public double[] getAngles(double momentum, double dir, double pos, double r1, double r2) {
+        double dSquared = Math.pow(r1, 2) + Math.pow(r2, 2) - 2*r1*r2*Math.cos(Math.PI/2 - pos + dir);
+        double x = (dQuared + Math.pow(r2, 2) - Math.pow(getRadius(momentum), 2)) / (2*Math.sqrt(dSquared));
+        double y = Math.sqrt(Math.pow(r2, 2) - Math.pow(x, 2));
         double[] solutions = new double[2];
+        solutions[0] = getAngle(y, x);
 
-        double theta = Math.PI/2 - dir;
-        double xPrime = getXPrime(momentum, dRadius);
-        double yPrime = getYPrime(xPrime, dRadius)[0];
+        // double theta = Math.PI/2 - dir;
+        // double xPrime = getXPrime(momentum, dRadius);
+        // double yPrime = getYPrime(xPrime, dRadius)[0];
 
-        solutions[0] = getAngle(getY(xPrime, yPrime, theta), getX(xPrime, yPrime, theta));
-        solutions[1] = getAngle(getY(xPrime, (-1*yPrime), theta), getX(xPrime, (-1*yPrime), theta));
+        // solutions[0] = getAngle(getY(xPrime, yPrime, theta), getX(xPrime, yPrime, theta));
+        // solutions[1] = getAngle(getY(xPrime, (-1*yPrime), theta), getX(xPrime, (-1*yPrime), theta));
 
         return solutions;
     }
