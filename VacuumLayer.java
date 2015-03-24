@@ -8,12 +8,15 @@ public class VacuumLayer extends Layer {
     }
 
     public void handle(Particle particle) {
+        double[] angles = getAngles(
+            particle.getMomentum(),
+            particle.getDirection(),
+            thickness
+        );
+
         particle.setPosition(
-            getAngles(
-                particle.getMomentum(),
-                particle.getDirection(),
-                thickness
-            )[0]
+            distance+thickness,
+            angles[0]
         );
     }
 

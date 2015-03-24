@@ -1,9 +1,13 @@
+import java.util.TreeMap;
+import java.util.SortedMap;
 
 public class Particle {
     private double mass; // MeV
     private double momentum; // MeV
     private double direction; // Radians
     private double position; // Radians
+
+    private SortedMap<Double, Double> positions;
 
     public Particle(double _mass,
                     double _momentum,
@@ -13,6 +17,10 @@ public class Particle {
         momentum = _momentum;
         direction = _direction;
         position = _position;
+
+        this.positions = new TreeMap<Double, Double>();
+
+        this.positions.put(0.0, 0.0);
     }
 
     public Particle(Particle p) {
@@ -34,5 +42,11 @@ public class Particle {
     public void setDirection(double _direction) { direction = _direction; }
 
     public double getPosition() { return position; }
-    public void setPosition(double _position) { position = _position; }
+
+    public void setPosition(double _radius, double _position) {
+        position = _position;
+        this.positions.put(_radius, _position);
+    }
+
+    public SortedMap<Double, Double> getPositions() { return positions; }
 }
