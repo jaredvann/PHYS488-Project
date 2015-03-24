@@ -22,10 +22,10 @@ class Trajectory {
         return yPrime*Math.cos(theta) - xPrime*Math.sin(theta);
     }
 
-    public double[] getAngles(double momentum, double theta0, double dRadius) {
+    public double[] getAngles(double momentum, double dir, double dRadius) {
         double[] solutions = new double[2];
 
-        double theta = Math.PI/2 - theta0;
+        double theta = Math.PI/2 - dir;
         double xPrime = getXPrime(momentum, dRadius);
         double yPrime = getYPrime(xPrime, dRadius)[0];
 

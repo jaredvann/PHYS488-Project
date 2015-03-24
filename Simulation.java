@@ -18,18 +18,27 @@ public class Simulation {
     private static Trajectory trajectory;
     private static CoincidenceDetector cd;
 
+    private static Attenuator beryllium;
+    private static Attenuator silicon;
     private static ArrayList<Layer> layers;
 
-    private static double cdMinMomentum, cdMaxMomentum;
     private static double[] masses;
-    private static double[][] muons;
+    private static Particle[] particles;
 
-    public static double trigger(double[] muon) {
+    public static double trigger(Particle particle) {
         // Get angles at the two coincidence detectors
-        // ---For reference: see final page of project handout
-        //                   these are the angles phi_9A and phi_9B
-        double angleAtA = trajectory.getAngles(muon[1], muon[2], cd.radiusA)[0];
-        double angleAtB = trajectory.getAngles(muon[1], muon[2], cd.radiusB)[0];
+        // --- For reference: see final page of project handout
+        //                    these are the angles phi_9A and phi_9B
+        (new AttenuatorLayer("trigger_A", cd.radiusA, cd.thickness, silicon))
+            .handle(particle);
+        double angleAtA = particle.getPosition();
+
+        (new VacuumLayer("trigger_sep", (cd.radiusA+cd.thickness), cd.range, trajectory))
+            .handle(particle);
+
+        (new AttenuatorLayer("trigger_B", cd.radiusB, cd.thickness, silicon))
+            .handle(particle);
+        double angleAtB = particle.getPosition();
 
         // Return the momentum estimated by the coincidence detector
         return cd.estimateMomentum(angleAtA, angleAtB);
@@ -40,48 +49,11 @@ public class Simulation {
         screen = new PrintWriter(System.out, true);
         config = new Config("main");
 
-        // Set up the Coincidence Detector
-        cd = new CoincidenceDetector(
-            config.getDouble("coincidenceDetectorRadiusA"),
-            config.getDouble("coincidenceDetectorRadiusB")
-        );
-
-        // Add beam pipe layer
-        layers.add(
-            new AttenuatorLayer(
-                "Beam Pipe",
-                3.5,
-                3,
-                new Attenuator(4, 9.0121831, 1.85, 3/20)
-            )
-        );
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // This is hard coded BERYLLIUM properties and step sizes, need to change
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        // Radii and thickness of silicon detector layers
-        double[] sdr = {4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91}; // cm
-        double sdt = 0.05; // cm
-
-        // Add silicon detector layers
-		for (int i = 0; i < sdr.length; i++) {
-			layers.add(
-                new AttenuatorLayer(
-                    "S-"+String.valueOf(sdr[i]),
-                    sdr[i],
-                    sdt,
-                    new Attenuator(14, 28.0855, 2.3290, sdt/20))
-            );
-        }
-
-        // Add additional vacuum layers and sort into correct order
-	    setup();
-
-        // How many muons should we simulate?
+        // How many particles should we simulate?
         int count = config.getInt("numParticles");
 
         // Initialize the muon array and get a new MuonFactory instance
-        muons = new double[count][3];
+        particles = new Particle[count];
 
         // Only generate muons so only muon mass needed
         masses = new double[] { 106 }; // MeV/c^2
@@ -92,32 +64,83 @@ public class Simulation {
 
         trajectory = new Trajectory(config.getDouble("magField"));
 
-        cdMinMomentum = config.getDouble("coincidenceMinMomentum");
-		cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
+        layers = new ArrayList<Layer>();
+
+        // Set up the Coincidence Detector
+        cd = new CoincidenceDetector(
+            config.getDouble("coincidenceDetectorRadiusA"),
+            config.getDouble("coincidenceDetectorRadiusB"),
+            0.05
+        );
+
+        // Add beryllium beam pipe layer with 20 steps
+        beryllium = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
+        layers.add(
+            new AttenuatorLayer(
+                "Beryllium Beam Pipe",
+                3.5,
+                0.3,
+                beryllium
+            )
+        );
+
+        // Radii and thickness of silicon detector layers
+        double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70 }; // cm
+        double sdt = 0.05; // cm
+
+        // Add silicon detector layers with 20 steps each
+        silicon = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+		for (int i = 0; i < sdr.length; i++) {
+			layers.add(
+                new AttenuatorLayer(
+                    "S-"+String.valueOf(sdr[i]),
+                    sdr[i],
+                    sdt,
+                    silicon
+                )
+            );
+        }
+
+        // Add additional vacuum layers and sort into correct order
+	    setup();
 
         // Run a simulation for each of the muons
-        double[] muon = new double[3];
-        double momentum;
+        Particle particle;
+        double estMomentum;
+
+        particleloop:
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
-            muon = muons[i] = factory.newParticle();
+            particle = factory.newParticle();
+            particles[i] = new Particle(particle);
 
             // Send the muon through all the layers in the accelerator
-            for (Layer layer : layers)
-                muon = layer.handle(muon);
+            for (Layer layer : layers) {
+                if (particle.getMomentum() > 0) {
+                    layer.handle(particle);
+                } else {
+                    System.out.println("\t[!] Muon " + (i+1) + " Stopped @ " + layer.getName());
+                    break particleloop;
+                }
+            }
 
             // If we are using a Coincidence Detector then hand it over!
-            if (cd != null) {
-                momentum = trigger(muon);
+            if (particle.getMomentum() > 0 && cd != null) {
+                estMomentum = trigger(particle);
 
-                screen.println("[*] Actual momentum: " + muon[1]);
-                screen.println("[*] Predicted momentum: " + momentum);
+                screen.println("[*] Actual momentum: " + particles[i].getMomentum());
+                screen.println("[*] Predicted momentum: " + estMomentum);
+                screen.println("[*] QOP: " + (int) (estMomentum*100 / particles[i].getMomentum()) + "%");
+
+                double cdMinMomentum = config.getDouble("coincidenceMinMomentum");
+        		double cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
 
                 // Check to see if this particle has the required momentum
-                if (momentum > cdMinMomentum && momentum < cdMaxMomentum)
+                if (estMomentum > cdMinMomentum && estMomentum < cdMaxMomentum) {
                     screen.println("[x] Muon " + (i+1) + " has momentum within bounds!");
-                else
+                } else {
                     screen.println("[!] Muon " + (i+1) + " has momentum out of bounds!");
+                }
             }
         }
     }
@@ -137,13 +160,21 @@ public class Simulation {
                         trajectory
                     )
                 );
-
-                last_z = l.getDistance() + l.getThickness();
 			}
+
+            last_z = l.getDistance() + l.getThickness();
 		}
 
         // Join two lists of layers together
 		layers.addAll(layers2);
+
+        // Add layer between final detector and the first trigger layer
+        layers.add(new VacuumLayer(
+            "V-"+String.valueOf(last_z),
+            last_z,
+            cd.radiusA,
+            trajectory
+        ));
 
         // Sort layers so in order of ascending radius
 		layers.sort(new Comparator<Layer>() {

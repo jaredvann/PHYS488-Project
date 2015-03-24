@@ -2,25 +2,29 @@ import java.io.*;
 import java.util.Random;
 
 class ParticleFactory {
+	private static Random random;
 
-	static Random random = new Random();
+	private static double[] masses;
 
-	static double[] masses;
-	static double minP, maxP, nextP;
+	private static double minP;
+	private static double maxP;
 
-	public ParticleFactory(double minP, double maxP, double[] masses)  {
-		this.minP = minP;
-		this.maxP = maxP;
-		this.masses = masses;
+	public ParticleFactory(double _minP, double _maxP, double[] _masses)  {
+		random = new Random();
+
+		minP = _minP;
+		maxP = _maxP;
+		masses = _masses;
 	}
 
-	//double[] = {mass, momentum, theta}
-	public static double[] newParticle() {
-		double[] particle = {
-			masses[random.nextInt(masses.length)],	// Mass
-			random.nextDouble()*(maxP-minP) + minP,	// Momentum
-			random.nextDouble()*Math.PI*2			// Theta
-		};
+	public static Particle newParticle() {
+		Particle particle = new Particle(
+			masses[random.nextInt(masses.length)],
+			random.nextDouble()*(maxP-minP) + minP,
+			random.nextDouble()*Math.PI/2,
+			0.0
+		);
+
 		return particle;
 	}
 }

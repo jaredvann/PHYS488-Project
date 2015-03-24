@@ -4,27 +4,30 @@ class CoincidenceDetector {
 	private Config config;
 
 	public double radiusA, radiusB;
-	private double thickness, midradius;
+	public double thickness, range;
+
+	private double midRadius;
 	private double momentum_split, mag_field;
 
-	public CoincidenceDetector(double radiusA, double radiusB) throws IOException {
+	public CoincidenceDetector(double radiusA, double radiusB, double thickness) throws IOException {
 		this.config = new Config("main");
 
 		mag_field = config.getDouble("magField");
 
 		this.radiusA = radiusA;
 		this.radiusB = radiusB;
+		this.thickness = thickness;
 
 		// These calculations only have to be done once
-		thickness = radiusB - radiusA;
-		midradius = radiusA + thickness/2;
+		range = radiusB - (radiusA + thickness);
+		midRadius = radiusA + thickness + range/2;
 	}
 
 	public double estimateMomentum(double angleAtA, double angleAtB) {
 		// Find delta angle
-		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/thickness));
-
+		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/range));
+		System.out.println(delta);
 		// Estimate and return momentum
-		return 0.3*mag_field*midradius/(2*delta);
+		return 0.3*mag_field*midRadius/(2*delta);
 	}
 }

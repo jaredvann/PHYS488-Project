@@ -10,7 +10,7 @@ abstract class Layer {
         this.thickness = thickness;
     }
 
-    public abstract double[] handle(double[] p);
+    public abstract void handle(Particle p);
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
