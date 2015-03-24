@@ -10,7 +10,7 @@ class CoincidenceDetector {
 	private double momentum_split, mag_field;
 
 	public CoincidenceDetector(double radiusA, double radiusB, double thickness) throws IOException {
-		this.config = new Config("main");
+		this.config = new Config("config.properties");
 
 		mag_field = config.getDouble("magField");
 

@@ -26,7 +26,7 @@ public class Simulation {
     public static void main(String[] args) throws IOException {
         // Setup Config & PrintWriter instances
         screen = new PrintWriter(System.out, true);
-        config = new Config("main");
+        config = new Config("config.properties");
 
         // How many particles should we simulate?
         int count = config.getInt("numParticles");
