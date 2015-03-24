@@ -16,6 +16,9 @@ public class VacuumLayer extends Layer {
             (distance + thickness)
         );
 
+        System.out.println(angles[0]);
+        System.out.println("\n");
+
         particle.setPosition(
             distance+thickness,
             angles[0]
@@ -40,9 +43,10 @@ public class VacuumLayer extends Layer {
     }
 
     public double[] getAngles(double momentum, double dir, double pos, double r1, double r2) {
-        double dSquared = Math.pow(r1, 2) + Math.pow(r2, 2) - 2*r1*r2*Math.cos(Math.PI/2 - pos + dir);
+        double rad = getRadius(momentum);
+        double dSquared = Math.pow(rad, 2) + Math.pow(r2, 2) - 2*r2*rad*Math.cos(dir - pos);
 
-        System.out.println(dSquared);
+        // System.out.println(dSquared);
 
         double x = (dSquared + Math.pow(r2, 2) - Math.pow(getRadius(momentum), 2)) / (2*Math.sqrt(dSquared));
         double y = Math.sqrt(Math.pow(r2, 2) - Math.pow(x, 2));

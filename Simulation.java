@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import java.io.FileWriter;
+import java.io.FileNotFoundException;
+
 import histogram.Histogram;
 
 /**
@@ -104,6 +107,8 @@ public class Simulation {
             if (particle.getMomentum() > 0 && cd != null)
                 trigger(particle, i);
         }
+
+        writeToDisk("data.csv", particles);
     }
 
 
@@ -166,5 +171,34 @@ public class Simulation {
                 return ((Double) l1.getDistance()).compareTo(l2.getDistance());
             }
         });
+    }
+
+
+    static public boolean writeToDisk(String filepath, Particle[] particles) throws IOException {
+        FileWriter file;
+        PrintWriter toFile = null;
+
+        try {
+            file = new FileWriter(filepath); // File stream
+            toFile = new PrintWriter(file); // File writer
+
+            for (Particle p : particles) {
+                for (Double value : p.getPositions().values()) {
+                    toFile.print(value);
+                    toFile.print(',');
+                }
+
+                toFile.print("\n");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e.toString());
+            return false;
+        } finally {
+            if (toFile != null)
+                toFile.close();
+
+            return true;
+        }
     }
 }
