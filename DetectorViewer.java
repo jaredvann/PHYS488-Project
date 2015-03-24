@@ -86,20 +86,10 @@ public class DetectorViewer extends Application {
 		for (int i = 0; i < points.length; i++) {
 			PTrack track = new PTrack();
 			for (int j = 0; j < layers.size(); j++)
-				track.addPoint(new PPoint(layers.get(j).radius, points[i][j+1]));
+				track.addPoint(new PPoint(layers.get(j).radius, points[i][j*2+1]));
 
 			particle_tracks.add(track);
 		}
-
-
-
-		// double[][] event_angles = {
-		// 	{},{0},{0.05},{0.1},{0.2},{0.3},{0.38},{0.44},{0.55},{0.68},{0.685}
-		// };
-
-		// for (int i = 0; i < layers.size(); i++)
-		// 	for (int j = 0; j < event_angles[i].length; j++)
-		// 		layers.get(i).c_points.add(new CollisionPoint(event_angles[i][j]));
 
 		launch(args);
 	}

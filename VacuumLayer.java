@@ -16,8 +16,8 @@ public class VacuumLayer extends Layer {
             (distance + thickness)
         );
 
-        System.out.println(angles[0]);
-        System.out.println("\n");
+        // System.out.println(angles[0]);
+        // System.out.println("\n");
 
         particle.setPosition(
             distance+thickness,
