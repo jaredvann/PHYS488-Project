@@ -17,7 +17,7 @@ public class Simulation {
     private static ParticleFactory factory;
     private static CoincidenceDetector cd;
 
-    private static Attenuator beryllium, silicon;
+    private static Attenuator beryllium_attn, silicon_attn;
     private static ArrayList<Layer> layers;
 
     private static Particle[] particles;
@@ -50,51 +50,31 @@ public class Simulation {
             0.05
         );
 
-        // Add beryllium beam pipe layer with 20 steps
-        beryllium = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
-        layers.add(
-            new AttenuatorLayer(
-                "Beryllium Beam Pipe",
-                3.5,
-                0.3,
-                beryllium
-            )
-        );
+        // Add beryllium attenuator and beam pipe layer with 20 steps
+        beryllium_attn = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
+        layers.add( new AttenuatorLayer(
+            "Beryllium Beam Pipe",
+            3.5,
+            0.3,
+            beryllium_attn
+        ));
 
         // Radii and thickness of silicon detector layers
-        double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70 }; // cm
+        double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91 };
         double sdt = 0.05; // cm
 
-        // Add silicon detector layers with 20 steps each
-        silicon = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+        // Add silicon attenuator instance
+        silicon_attn = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+
+        // Add silicon detectors
         for (int i = 0; i < sdr.length; i++) {
-            layers.add(
-                new AttenuatorLayer(
-                    "S-"+String.valueOf(sdr[i]),
-                    sdr[i],
-                    sdt,
-                    silicon
-                )
-            );
+            layers.add( new AttenuatorLayer(
+                "S_"+String.valueOf(sdr[i]),
+                sdr[i],
+                sdt,
+                silicon_attn
+            ));
         }
-
-        layers.add(
-            new AttenuatorLayer(
-                "trigger_A",
-                cd.radiusA,
-                cd.thickness,
-                silicon
-            )
-        );
-
-        layers.add(
-            new AttenuatorLayer(
-                "trigger_B",
-                cd.radiusB,
-                cd.thickness,
-                silicon
-            )
-        );
 
         // Add additional vacuum layers and sort into correct order
         setupDetectorLayers();
@@ -107,8 +87,6 @@ public class Simulation {
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
             particle = factory.newParticle();
-            // particles[i] = new Particle(particle);
-            particles[i] = particle;
 
             // Send the muon through all the layers in the accelerator
             for (Layer layer : layers) {
@@ -119,6 +97,8 @@ public class Simulation {
                     break particleloop;
                 }
             }
+
+            particles[i] = particle;
 
             // If we are using a Coincidence Detector then hand it over!
             if (particle.getMomentum() > 0 && cd != null)
@@ -165,14 +145,12 @@ public class Simulation {
         // Add vacuum layers to fill in gaps between physical layers
         for (Layer l : layers) {
             if (l.getDistance() > last_z) {
-                layers2.add(
-                    new VacuumLayer(
-                        "V-"+String.valueOf(last_z),
-                        last_z,
-                        l.getDistance()-last_z,
-                        config.getDouble("magField")
-                    )
-                );
+                layers2.add( new VacuumLayer(
+                    "V-"+String.valueOf(last_z),
+                    last_z,
+                    l.getDistance()-last_z,
+                    config.getDouble("magField")
+                ));
             }
 
             last_z = l.getDistance() + l.getThickness();
