@@ -15,7 +15,6 @@ public class Simulation {
     private static Config config;
 
     private static ParticleFactory factory;
-    private static Trajectory trajectory;
     private static CoincidenceDetector cd;
 
     private static Attenuator beryllium;
@@ -33,7 +32,7 @@ public class Simulation {
             .handle(particle);
         double angleAtA = particle.getPosition();
 
-        (new VacuumLayer("trigger_sep", (cd.radiusA+cd.thickness), cd.range, trajectory))
+        (new VacuumLayer("trigger_sep", (cd.radiusA+cd.thickness), cd.range, config.getDouble("magField")))
             .handle(particle);
 
         (new AttenuatorLayer("trigger_B", cd.radiusB, cd.thickness, silicon))
@@ -61,8 +60,6 @@ public class Simulation {
             config.getDouble("minMomentum"),
             config.getDouble("maxMomentum"),
             masses);
-
-        trajectory = new Trajectory(config.getDouble("magField"));
 
         layers = new ArrayList<Layer>();
 
@@ -102,7 +99,7 @@ public class Simulation {
         }
 
         // Add additional vacuum layers and sort into correct order
-	    setup();
+	    setupDetectorLayers();
 
         // Run a simulation for each of the muons
         Particle particle;
@@ -145,7 +142,7 @@ public class Simulation {
         }
     }
 
-    private static void setup() {
+    private static void setupDetectorLayers() {
 		ArrayList<Layer> layers2 = new ArrayList<Layer>();
 		double last_z = 0.0;
 
@@ -157,7 +154,7 @@ public class Simulation {
                         "V-"+String.valueOf(last_z),
                         last_z,
                         l.getDistance(),
-                        trajectory
+                        config.getDouble("magField")
                     )
                 );
 			}
@@ -173,7 +170,7 @@ public class Simulation {
             "V-"+String.valueOf(last_z),
             last_z,
             cd.radiusA,
-            trajectory
+            config.getDouble("magField")
         ));
 
         // Sort layers so in order of ascending radius
