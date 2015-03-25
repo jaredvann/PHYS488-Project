@@ -12,6 +12,7 @@ class Attenuator {
 		this.massNumber = massNumber;
 		this.density = density;
 
+
 		// Precalculate most of mcsTheta equation to save repetitive calculations.
 		// Approximates step size as constant.
 		// May introduce slight errors at far edge of material.
@@ -48,4 +49,6 @@ class Attenuator {
 	public double getMCSTheta0(double mass, double momentum) {
 		return mcsPreCalc/(momentum*Helpers.beta(mass, momentum)); //radians
 	}
+
+
 }
