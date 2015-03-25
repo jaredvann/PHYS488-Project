@@ -27,7 +27,6 @@ public class Simulation {
 
     private static Particle[] particles;
 
-
     public static void main(String[] args) throws IOException {
         // Setup Config & PrintWriter instances
         screen = new PrintWriter(System.out, true);
@@ -85,13 +84,14 @@ public class Simulation {
         setupDetectorLayers();
 
         // Run a simulation for each of the muons
-        Particle particle;
+        Particle particle = factory.newParticle();
         double estMomentum;
 
         particleloop:
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
-            particle = factory.newParticle();
+            // particle = factory.newParticle();
+            particles[i] = new Particle(particle);
 
             // Send the muon through all the layers in the accelerator
             for (Layer layer : layers) {
@@ -103,14 +103,12 @@ public class Simulation {
                 }
             }
 
-            particles[i] = particle;
-
             // If we are using a Coincidence Detector then hand it over!
             if (particle.getMomentum() > 0 && cd != null)
                 trigger(particle, i);
         }
 
-        writeToDisk("data.csv", particles);
+        writeToDisk("data.csv", new Particle[] { particle });
     }
 
 
@@ -118,7 +116,6 @@ public class Simulation {
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
-        System.out.println(Arrays.toString(particle.getPositions().entrySet().toArray()));
         double angleAtA = particle.getPositions().get(90.05);
         double angleAtB = particle.getPositions().get(91.00);
 
@@ -152,7 +149,7 @@ public class Simulation {
         // Add vacuum layers to fill in gaps between physical layers
         for (Layer l : layers) {
             if (l.getStart() > last_z) {
-                layers2.add( new VacuumLayer(
+                layers2.add(new VacuumLayer(
                     "V-"+String.valueOf(last_z),
                     last_z,
                     l.getStart(),

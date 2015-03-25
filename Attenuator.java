@@ -7,7 +7,7 @@ class Attenuator {
 
 	public double mcsPreCalc, eLossPreCalc, two_me_over_iM;
 
-	public Attenuator (int atomicNumber, double massNumber, double density, double stepSize) {
+	public Attenuator(int atomicNumber, double massNumber, double density, double stepSize) {
 		this.atomicNumber = atomicNumber;
 		this.massNumber = massNumber;
 		this.density = density;
@@ -34,7 +34,7 @@ class Attenuator {
 		double b2 = Math.pow(Helpers.beta(mass, momentum), 2); // Beta(p)^2
 		double g2 = 1/(1 - b2); // Gamma(p)^2
 
-		return eLossPreCalc * 1/b2 * (Math.log(two_me_over_iM * b2 * g2) - b2); //MeV
+		return eLossPreCalc * (1/b2) * (Math.log(two_me_over_iM * b2 * g2) - b2); //MeV
 	}
 
 	public double x0() {
@@ -47,7 +47,7 @@ class Attenuator {
 	}
 
 	public double getMCSTheta0(double mass, double momentum) {
-		return mcsPreCalc/(momentum*Helpers.beta(mass, momentum)); //radians
+		return mcsPreCalc/(momentum * Helpers.beta(mass, momentum)); //radians
 	}
 
 

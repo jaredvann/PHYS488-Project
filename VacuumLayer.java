@@ -12,37 +12,27 @@ public class VacuumLayer extends Layer {
     }
 
     public void handle(Particle particle) {
-        double[] angles = getAngles(particle);
+        double nextAngle = getNextAngle(particle);
 
-        particle.setPosition(end, angles[0]);
-        
+        System.out.println(particle.getPosition() + " -> " + nextAngle);
+
+        particle.setPosition(end, nextAngle);
     }
 
-    public double[] getAngles(Particle particle) {
-        double[] solutions = new double[2];
-
+    public double getNextAngle(Particle particle) {
         double pRadius = getRadius(particle.getMomentum());
-        double pDirection = getRadius(particle.getDirection());
+        double pDirection = particle.getDirection();
 
-        double pMotionCenterX = particle.getX(start) + getXPrime(pRadius, pDirection);
-        double pMotionCenterY = particle.getY(start) - getYPrime(pRadius, pDirection);
+        double pMotionCenterX = particle.getX(0) + pRadius*Math.sin(pDirection);
+        double pMotionCenterY = particle.getY(0) - pRadius*Math.cos(pDirection);
 
-        double d = Math.sqrt(Math.pow(pMotionCenterX, 2) + Math.pow(pMotionCenterY, 2));
-        double x = (Math.pow(d, 2) - Math.pow(pRadius, 2) + Math.pow(end, 2)) / (2 * d);
-        double y = Math.sqrt(Math.pow(end, 2) - Math.pow(x, 2));
+        System.out.println(pMotionCenterY);
 
-        solutions[0] = Math.atan2(y, x);
-        solutions[1] = Math.atan2(y, x);
+        double d2 = Math.pow(pMotionCenterX, 2) + Math.pow(pMotionCenterY, 2);
+        double x = (d2 - Math.pow(pRadius, 2) + Math.pow(end, 2)) / (2*Math.sqrt(d2));
+        double y = Math.sqrt(Math.pow(end, 2) + Math.pow(x, 2));
 
-        return solutions;
-    }
-
-    public double getXPrime(double pRadius, double pDirection) {
-        return pRadius * Math.sin(pDirection);
-    }
-
-    public double getYPrime(double pRadius, double pDirection) {
-        return pRadius * Math.cos(pDirection);
+        return Math.atan2(y, x);
     }
 
     private double getRadius(double momentum) {

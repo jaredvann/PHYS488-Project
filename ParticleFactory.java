@@ -21,8 +21,8 @@ class ParticleFactory {
 		Particle particle = new Particle(
 			masses[random.nextInt(masses.length)],
 			random.nextDouble()*(maxP-minP) + minP,
-			random.nextDouble()*Math.PI/2,
-			0.0
+			Math.PI/2,
+			0
 		);
 
 		return particle;

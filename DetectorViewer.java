@@ -189,7 +189,7 @@ class PPoint {
 
 	public PPoint(double r, double a) {
 		this.radius = r;
-		this.angle = a;
+		this.angle = Math.PI/2 - a;
 	}
 
 }
@@ -200,7 +200,7 @@ class CollisionPoint {
 	public double angle;
 
 	public CollisionPoint (double a) {
-		this.angle = a;
+		this.angle = Math.PI/2 - a;
 	}
 }
 

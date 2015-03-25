@@ -33,7 +33,7 @@ class Helpers {
 
 		for (int n=0; n<=11; n++)
 			sum += value.nextDouble(); // use the class Random to make a number
-		
+
 		return xmean + sigma*(sum-6);
 	}
 }

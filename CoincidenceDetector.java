@@ -26,7 +26,7 @@ class CoincidenceDetector {
 	public double estimateMomentum(double angleAtA, double angleAtB) {
 		// Find delta angle
 		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/range));
-		System.out.println(delta);
+
 		// Estimate and return momentum
 		return 0.3*mag_field*midRadius/(2*delta);
 	}
