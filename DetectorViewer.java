@@ -23,7 +23,7 @@ public class DetectorViewer extends Application {
 
 	private double PI2 = Math.PI/2;
 
-	static public ArrayList<Layer> layers = new ArrayList<Layer>();
+	static public ArrayList<DetectorLayer> layers = new ArrayList<DetectorLayer>();
 	static public ArrayList<PTrack> particle_tracks = new ArrayList<PTrack>();
 
 	static public double[][] event_angles;
@@ -73,13 +73,13 @@ public class DetectorViewer extends Application {
 		double[] coincidence = {900, 910};
 
 		for (double r : beryllium)
-			layers.add(new Layer(r, r+6, Color.GREY));
+			layers.add(new DetectorLayer(r, r+6, Color.GREY));
 
 		for (double r : silicon)
-			layers.add(new Layer(r, r+2, Color.GREY));
+			layers.add(new DetectorLayer(r, r+2, Color.GREY));
 
 		for (double r : coincidence)
-			layers.add(new Layer(r, r+2, Color.GREY));
+			layers.add(new DetectorLayer(r, r+2, Color.GREY));
 
 		double[][] points = importCSVData("data.csv", 10);
 
@@ -205,19 +205,19 @@ class CollisionPoint {
 }
 
 
-class Layer {
+class DetectorLayer {
 
 	public double inner_radius, outer_radius, radius;
 	public Color color = Color.GREY;
 	public ArrayList<CollisionPoint> c_points = new ArrayList<CollisionPoint>();
 
-	public Layer(double inner_radius, double outer_radius) {
+	public DetectorLayer(double inner_radius, double outer_radius) {
 		this.inner_radius = inner_radius;
 		this.outer_radius = outer_radius;
 		this.radius = (this.outer_radius+this.inner_radius)/2;
 	}
 
-	public Layer(double inner_radius, double outer_radius, Color color) {
+	public DetectorLayer(double inner_radius, double outer_radius, Color color) {
 		this.inner_radius = inner_radius;
 		this.outer_radius = outer_radius;
 		this.radius = (this.outer_radius+this.inner_radius)/2;

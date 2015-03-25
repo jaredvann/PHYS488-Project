@@ -19,7 +19,6 @@ public class Particle {
         position = _position;
 
         this.positions = new TreeMap<Double, Double>();
-
         this.positions.put(0.0, 0.0);
     }
 
@@ -32,6 +31,13 @@ public class Particle {
         );
     }
 
+    // ---------- Helpers ----------
+
+    public double getX(double radius) { return radius * Math.cos(position); }
+    public double getY(double radius) { return radius * Math.sin(position); }
+
+    // ---------- Getters & Setters ----------
+
     public double getMass() { return mass; }
     public void setMass(double _mass) { mass = _mass; }
 
@@ -42,11 +48,11 @@ public class Particle {
     public void setDirection(double _direction) { direction = _direction; }
 
     public double getPosition() { return position; }
+    public void setPosition(double _position) { position = _position; }
 
+    public SortedMap<Double, Double> getPositions() { return positions; }
     public void setPosition(double _radius, double _position) {
         position = _position;
         this.positions.put(_radius, _position);
     }
-
-    public SortedMap<Double, Double> getPositions() { return positions; }
 }

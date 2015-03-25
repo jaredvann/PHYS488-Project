@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 
 import histogram.Histogram;
 
+import java.util.Arrays;
+
 /**
  * Let's get our simulation on!
  */
@@ -55,10 +57,10 @@ public class Simulation {
 
         // Add beryllium attenuator and beam pipe layer with 20 steps
         beryllium_attn = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
-        layers.add( new AttenuatorLayer(
+        layers.add(new AttenuatorLayer(
             "Beryllium Beam Pipe",
             3.5,
-            0.3,
+            3.7,
             beryllium_attn
         ));
 
@@ -74,7 +76,7 @@ public class Simulation {
             layers.add( new AttenuatorLayer(
                 "S_"+String.valueOf(sdr[i]),
                 sdr[i],
-                sdt,
+                (sdr[i] + sdt),
                 silicon_attn
             ));
         }
@@ -116,7 +118,7 @@ public class Simulation {
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
-
+        System.out.println(Arrays.toString(particle.getPositions().entrySet().toArray()));
         double angleAtA = particle.getPositions().get(90.05);
         double angleAtB = particle.getPositions().get(91.00);
 
@@ -149,16 +151,16 @@ public class Simulation {
 
         // Add vacuum layers to fill in gaps between physical layers
         for (Layer l : layers) {
-            if (l.getDistance() > last_z) {
+            if (l.getStart() > last_z) {
                 layers2.add( new VacuumLayer(
                     "V-"+String.valueOf(last_z),
                     last_z,
-                    l.getDistance()-last_z,
+                    l.getStart(),
                     config.getDouble("magField")
                 ));
             }
 
-            last_z = l.getDistance() + l.getThickness();
+            last_z = l.getEnd();
         }
 
         // Join two lists of layers together
@@ -168,7 +170,7 @@ public class Simulation {
         layers.sort(new Comparator<Layer>() {
             @Override
             public int compare(Layer l1, Layer l2) {
-                return ((Double) l1.getDistance()).compareTo(l2.getDistance());
+                return ((Double) l1.getStart()).compareTo(l2.getStart());
             }
         });
     }

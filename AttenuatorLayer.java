@@ -5,12 +5,14 @@ public class AttenuatorLayer extends Layer {
 
     private Attenuator attn;
 
-    public AttenuatorLayer(String n, double d, double t, Attenuator attn) {
-        super(n, d, t);
+    public AttenuatorLayer(String n,
+                           double s,
+                           double e,
+                           Attenuator _attn) {
+        super(n, s, e);
 
-        this.stepSize = t / steps;
-
-        this.attn = attn;
+        stepSize = getThickness() / steps;
+        attn = _attn;
     }
 
     public void handle(Particle particle) {
@@ -20,15 +22,15 @@ public class AttenuatorLayer extends Layer {
         double position = particle.getPosition();
 
         double theta;
-        double _distance;
+        double distance;
 
         for (int i = 0; i < steps; i++) {
-            theta = attn.getMCSTheta0(particle.getMass(), particle.getMomentum());
-            _distance = stepSize / Math.cos(theta); // Hypotenuse
+            theta = Helpers.gauss(0, attn.getMCSTheta0(mass, momentum));
+            distance = stepSize / Math.cos(theta); // Hypotenuse
 
-            momentum -= attn.getEnergyLoss(mass, momentum) * Math.abs(_distance);
-            direction += Helpers.gauss(0, theta);
-            position += stepSize * Math.sin(theta);
+            momentum -= attn.getEnergyLoss(mass, momentum) * Math.abs(distance);
+            direction += theta;
+            position += stepSize * Math.tan(theta);
 
             if (momentum <= 0) {
                 momentum = 0;
@@ -38,6 +40,6 @@ public class AttenuatorLayer extends Layer {
 
         particle.setMomentum(momentum);
         particle.setDirection(direction);
-        particle.setPosition(distance+thickness, position);
+        particle.setPosition(end, position);
     }
 }
