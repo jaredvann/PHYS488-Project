@@ -25,7 +25,7 @@
 // 		);
 //
 // 		// Find angle to rotate coordinate system by
-// 		double rotation_angle = Math.atan2(traj_centre.y, traj_centre.x);
+// 		double rotation_angle = Helpers.atan2(traj_centre.y, traj_centre.x);
 //
 // 		// Rotate trajectory centre point to align with x-axis
 // 		Vec rot_traj_centre = traj_centre.rotate(-rotation_angle);

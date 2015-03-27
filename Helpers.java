@@ -47,14 +47,13 @@ class Helpers {
 	public static double mevc2ToKg(double m) {
 		return 1.780E-30 * m;
 	}
-
-	// Converts radians to degrees
-	public static double radToDegree(double r) {
-		return r * 57.295779;
-	}
-
-	// Converts degrees to radians
-	public static double degreeToRad(double d) {
-		return d * 0.01745329;
+	
+	// Modified math.atan2 method
+	// Gives angle from 0 to 2pi
+	// With +y axis as 0 point, in clockwise direction
+	public static double atan2(double y, double x) {
+		double a = Math.atan2(x, y);
+		if (a < 0) { return a + 2*Math.PI; }
+		else { return a; }
 	}
 }
