@@ -36,4 +36,25 @@ class Helpers {
 
 		return xmean + sigma*(sum-6);
 	}
+
+	// If input is positive returns 1, else returns 0
+	public static double isPos(double a) {
+		if (a >= 0 ) { return 1; }
+		else { return 0; }
+	}
+
+	// Converts mass from MeV/c^2 into kg
+	public static double mevc2ToKg(double m) {
+		return 1.780E-30 * m;
+	}
+
+	// Converts radians to degrees
+	public static double radToDegree(double r) {
+		return r * 57.295779;
+	}
+
+	// Converts degrees to radians
+	public static double degreeToRad(double d) {
+		return d * 0.01745329;
+	}
 }

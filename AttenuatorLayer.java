@@ -15,7 +15,7 @@ public class AttenuatorLayer extends Layer {
         attn = _attn;
     }
 
-    public void handle(Particle particle) {
+    public boolean handle(Particle particle) {
         double mass = particle.getMass();
         double momentum = particle.getMomentum();
         double direction = particle.getDirection();
@@ -34,12 +34,14 @@ public class AttenuatorLayer extends Layer {
 
             if (momentum <= 0) {
                 momentum = 0;
-                break;
+                return false;
             }
         }
 
         particle.setMomentum(momentum);
         particle.setDirection(direction);
         particle.setPosition(end, position);
+
+        return true;
     }
 }

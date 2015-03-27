@@ -11,7 +11,7 @@ public abstract class Layer {
         end = _end;
     }
 
-    public abstract void handle(Particle p);
+    public abstract boolean handle(Particle p);
 
     // ---------- Helpers ----------
 

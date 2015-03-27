@@ -11,12 +11,14 @@ public class VacuumLayer extends Layer {
         field = _field;
     }
 
-    public void handle(Particle particle) {
+    public boolean handle(Particle particle) {
         double nextAngle = getNextAngle(particle);
 
         System.out.println(particle.getPosition() + " -> " + nextAngle);
 
         particle.setPosition(end, nextAngle);
+
+        return true;
     }
 
     public double getNextAngle(Particle particle) {
