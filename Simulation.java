@@ -23,7 +23,9 @@ public class Simulation {
     private static CoincidenceDetector cd;
 
     private static Attenuator beryllium_attn, silicon_attn;
-    private static ArrayList<Layer> layers;
+
+    private static List<DetectorLayer> detector_layers = new ArrayList<DetectorLayer>();
+	private static List<Layer> layers = new ArrayList<Layer>();
 
     private static Particle[] particles;
 
@@ -45,8 +47,6 @@ public class Simulation {
             config.getDouble("maxMomentum"),
             masses);
 
-        layers = new ArrayList<Layer>();
-
         // Set up the Coincidence Detector
         cd = new CoincidenceDetector(
             config.getDouble("coincidenceDetectorRadiusA"),
@@ -63,28 +63,40 @@ public class Simulation {
             beryllium_attn
         ));
 
-        // Radii and thickness of silicon detector layers
-        double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91 };
-        double sdt = 0.05; // cm
+        // // Radii and thickness of silicon detector layers
+        // double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70, 90, 91 };
+        // double sdt = 0.05; // cm
+        //
+        // // Add silicon attenuator instance
+        // silicon_attn = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+        //
+        // // Add silicon detectors
+        // for (int i = 0; i < sdr.length; i++) {
+        //     layers.add( new AttenuatorLayer(
+        //         "S_"+String.valueOf(sdr[i]),
+        //         sdr[i],
+        //         (sdr[i] + sdt),
+        //         silicon_attn
+        //     ));
+        // }
+        //
+        // detector_layers.add(new DetectorLayer("Detector1", 90.05, 360, 1));
+		// detector_layers.add(new DetectorLayer("Detector2", 91, 360, 1));
 
-        // Add silicon attenuator instance
-        silicon_attn = new Attenuator(14, 28.0855, 2.3290, sdt/20);
-
-        // Add silicon detectors
-        for (int i = 0; i < sdr.length; i++) {
-            layers.add( new AttenuatorLayer(
-                "S_"+String.valueOf(sdr[i]),
-                sdr[i],
-                (sdr[i] + sdt),
-                silicon_attn
-            ));
+        // Temporary detector setup to test magnetic field layers
+        for (int i = 0; i < 10; i++) {
+            detector_layers.add(new DetectorLayer("Detector", i, 360, 1));
         }
 
         // Add additional vacuum layers and sort into correct order
-        setupDetectorLayers();
+        setupLayers();
 
         // Run a simulation for each of the muons
-        Particle particle = factory.newParticle();
+        // Particle particle = factory.newParticle();
+
+        // Test Particle
+        Particle particle = new Particle(105.9, 1000, 0, 0);
+
         double estMomentum;
 
         particleloop:
@@ -93,19 +105,24 @@ public class Simulation {
             // particle = factory.newParticle();
             particles[i] = new Particle(particle);
 
+            // TODO - Could do with refactoring into own method
             // Send the muon through all the layers in the accelerator
             for (Layer layer : layers) {
                 if (particle.getMomentum() > 0) {
-                    layer.handle(particle);
+                    if (layer.handle(particle) == false){
+                        System.out.println("ERR");
+                        break particleloop;
+                    }
                 } else {
                     System.out.println("\t[!] Muon " + (i+1) + " Stopped @ " + layer.getName());
                     break particleloop;
                 }
             }
 
+            // I broke this, sorry - jared
             // If we are using a Coincidence Detector then hand it over!
-            if (particle.getMomentum() > 0 && cd != null)
-                trigger(particle, i);
+            // if (particle.getMomentum() > 0 && cd != null)
+            //     trigger(particle, i);
         }
 
         writeToDisk("data.csv", new Particle[] { particle });
@@ -140,38 +157,46 @@ public class Simulation {
     }
 
 
-    private static void setupDetectorLayers() {
-        // Adds vacuum layers inbetween attenuation layers and sorts into
-        // order of ascending radius.
-        ArrayList<Layer> layers2 = new ArrayList<Layer>();
-        double last_z = 0.0;
+    private static void setupLayers() {
+		// Add detector layers
+		layers.addAll(detector_layers);
 
-        // Add vacuum layers to fill in gaps between physical layers
-        for (Layer l : layers) {
-            if (l.getStart() > last_z) {
-                layers2.add(new VacuumLayer(
-                    "V-"+String.valueOf(last_z),
-                    last_z,
-                    l.getStart(),
+		// Initial layer sort
+		orderLayers();
+
+		// Add vacuum layers to fill in gaps between physical layers
+		ArrayList<Layer> layers2 = new ArrayList<Layer>();
+		double last = 0.0;
+
+		for (Layer l : layers) {
+			if (l.start > last) {
+				layers2.add( new FieldLayer(
+					"V-"+String.valueOf(last),
+					last,
+					l.start,
                     config.getDouble("magField")
-                ));
-            }
+				));
+			}
+			last = l.end;
+		}
 
-            last_z = l.getEnd();
-        }
+		// Add vacuum layers
+		layers.addAll(layers2);
 
-        // Join two lists of layers together
-        layers.addAll(layers2);
+		// Final layer sort
+		orderLayers();
+	}
 
-        // Sort layers so in order of ascending radius
-        layers.sort(new Comparator<Layer>() {
-            @Override
-            public int compare(Layer l1, Layer l2) {
-                return ((Double) l1.getStart()).compareTo(l2.getStart());
-            }
-        });
-    }
-
+	private static void orderLayers() {
+		// Sort layers in order of ascending radius
+		layers.sort(new Comparator<Layer>() {
+			@Override
+			public int compare(Layer l1, Layer l2) {
+				Double r1 = l1.start;
+				return r1.compareTo(l2.start);
+			}
+		});
+	}
 
     static public boolean writeToDisk(String filepath, Particle[] particles) throws IOException {
         FileWriter file;
@@ -181,14 +206,12 @@ public class Simulation {
             file = new FileWriter(filepath); // File stream
             toFile = new PrintWriter(file); // File writer
 
-            for (Particle p : particles) {
-                for (Double value : p.getPositions().values()) {
-                    toFile.print(value);
-                    toFile.print(',');
-                }
-
-                toFile.print("\n");
-            }
+            for (DetectorLayer dl : detector_layers) {
+				for (Double angle : dl.getHits()) {
+					toFile.print(angle+",");
+				}
+				toFile.print("\n");
+			}
 
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());

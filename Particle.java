@@ -6,6 +6,7 @@ public class Particle {
     private double momentum; // MeV
     private double direction; // Radians
     private double position; // Radians
+    private double charge; // Elementary units?
 
     private SortedMap<Double, Double> positions;
 
@@ -17,6 +18,8 @@ public class Particle {
         momentum = _momentum;
         direction = _direction;
         position = _position;
+
+        charge = 1;
 
         this.positions = new TreeMap<Double, Double>();
         this.positions.put(0.0, 0.0);
@@ -49,6 +52,9 @@ public class Particle {
 
     public double getPosition() { return position; }
     public void setPosition(double _position) { position = _position; }
+
+    public double getCharge() { return charge; }
+    public void setCharge(double _charge) { charge = _charge; }
 
     public SortedMap<Double, Double> getPositions() { return positions; }
     public void setPosition(double _radius, double _position) {
