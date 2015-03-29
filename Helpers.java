@@ -37,23 +37,16 @@ class Helpers {
 		return xmean + sigma*(sum-6);
 	}
 
-	// If input is positive returns 1, else returns 0
+	// If input is positive returns 1, else returns -1
 	public static double isPos(double a) {
 		if (a >= 0 ) { return 1; }
-		else { return 0; }
+		else { return -1; }
 	}
 
 	// Converts mass from MeV/c^2 into kg
 	public static double mevc2ToKg(double m) {
 		return 1.780E-30 * m;
 	}
-	
-	// Modified math.atan2 method
-	// Gives angle from 0 to 2pi
-	// With +y axis as 0 point, in clockwise direction
-	public static double atan2(double y, double x) {
-		double a = Math.atan2(x, y);
-		if (a < 0) { return a + 2*Math.PI; }
-		else { return a; }
-	}
+
+
 }

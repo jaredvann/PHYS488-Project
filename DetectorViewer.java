@@ -15,44 +15,45 @@ import java.io.FileReader;
 
 public class DetectorViewer extends Application {
 
-	public int width = 800;
-	public int height = 800;
+	private static Config config;
 
-	public double radius = 1000;
+	private int width = 800;
+	private int height = 800;
+
+	private double radius = 1000;
 	private double scale_factor;
 
 	private double PI2 = Math.PI/2;
 
-	static public ArrayList<DetectorLayer2> layers = new ArrayList<DetectorLayer2>();
-
-	static public double[][] points;
-	static public double[] detector_radii;
-	static public int[] detector_resolutions;
+	private static ArrayList<Layer> layers = new ArrayList<Layer>();
+	private static ArrayList<DetectorLayer> detector_layers = new ArrayList<DetectorLayer>();
 
 
 	public static void main(String[] args) throws IOException {
+		config = new Config("config.properties");
 
 		double[] beryllium = {35};
 		double[] silicon = {45, 80, 120, 180, 300, 400, 500, 700};
 		double[] coincidence = {900, 910};
 
 		for (double r : beryllium)
-			layers.add(new DetectorLayer2(r, r+6, Color.GREY));
+			layers.add(new Layer("", r, r+6));
 
 		for (double r : silicon)
-			layers.add(new DetectorLayer2(r, r+2, Color.GREY));
+			layers.add(new Layer("", r, r+2));
 
 		for (double r : coincidence)
-			layers.add(new DetectorLayer2(r, r+2, Color.GREY));
+			layers.add(new Layer("", r, r+1));
 
+		// for (double r : coincidence)
+		// 	detector_layers.add(new DetectorLayer("", r));
 
-		double[] dr = {0, 100, 200, 300, 400, 500, 600, 700, 800, 900};
-		detector_radii = dr;
+		for (int i = 0; i < 10; i++) {
+			detector_layers.add(new DetectorLayer("Detector", i*100));
+		}
 
-		int[] dr2 = {360,360,360,360,360,360,360,360,360,360};
-		detector_resolutions = dr2;
+		importCSVData("data.csv");
 
-		points = importCSVData("data.csv", 10, 1);
 
 		launch(args);
 	}
@@ -63,9 +64,7 @@ public class DetectorViewer extends Application {
 	}
 
 
-	private static double[][] importCSVData(String file_path, int detectors, int particles) throws IOException {
-		double[][] points = new double[detectors][particles];
-		double[] d_values = new double[particles];
+	private static void importCSVData(String file_path) throws IOException {
 		String[] s_values;
 		BufferedReader br = null;
 		String line = "";
@@ -73,15 +72,12 @@ public class DetectorViewer extends Application {
 		try {
 			br = new BufferedReader(new FileReader(file_path));
 
-			for (int i = 0; i < detectors; i++) {
+			for (DetectorLayer detector : detector_layers) {
 				if ((line = br.readLine()) != null) {
 					s_values = line.split(",");
-					d_values = new double[particles];
 
 					for (int j = 0; j < s_values.length; j++)
-						d_values[j] = Double.parseDouble(s_values[j]);
-
-					points[i] = d_values;
+						detector.addHit(Double.parseDouble(s_values[j]));
 				}
 			}
 		}
@@ -94,12 +90,13 @@ public class DetectorViewer extends Application {
 			}
 		}
 
-		return points;
 	}
 
 
 	@Override
 	public void start(Stage stage) {
+		sortLayers();
+
 		Group root = new Group();
 		Canvas canvas = new Canvas(width, height);
 		GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -114,15 +111,28 @@ public class DetectorViewer extends Application {
 	}
 
 
+	private void sortLayers() {
+		// layers.addAll(detector_layers);
+
+		layers.sort(new Comparator<Layer>() {
+			@Override
+			public int compare(Layer l1, Layer l2) {
+				Double r1 = l2.start;
+				return r1.compareTo(l1.start);
+			}
+		});
+	}
+
+
 	private void drawDetector(GraphicsContext gc) {
 		double r;
 
-		for (int i = layers.size()-1; i >= 0; i--) {
-			r = layers.get(i).outer_radius * scale_factor;
-			gc.setFill(layers.get(i).color);
+		for (Layer layer : layers) {
+			r = layer.getEnd() * scale_factor;
+			gc.setFill(layer.color);
 			gc.fillOval(width/2-r, height/2-r, r*2, r*2);
 
-			r = layers.get(i).inner_radius * scale_factor;
+			r = layer.getStart() * scale_factor;
 			gc.setFill(Color.WHITE);
 			gc.fillOval(width/2-r, height/2-r, r*2, r*2);
 		}
@@ -130,15 +140,12 @@ public class DetectorViewer extends Application {
 
 
 	private void drawPoints(GraphicsContext gc) {
-		double r; double r2 = 4; double angle; double sf;
+		double r; double r2 = 4;
 
-		for (int i = 0; i < points.length; i++) {
-			r = detector_radii[i] * scale_factor;
-
-			for (int j = 0; j < points[i].length; j++) {
-				angle = points[i][j];
-
-				gc.setFill(Color.PURPLE);
+		for (DetectorLayer detector: detector_layers) {
+			r = detector.getStart() * scale_factor;
+			for (double angle : detector.getHits()) {
+				gc.setFill(Color.BLACK);
 				gc.fillOval(
 					width/2 + r*Math.cos(angle) - r2/2,
 					height/2 - r*Math.sin(angle) - r2/2,
@@ -147,31 +154,4 @@ public class DetectorViewer extends Application {
 			}
 		}
 	}
-
-	private Color randomColor() {
-		return new Color(Math.random(), Math.random(), Math.random(), 1.0);
-	}
-}
-
-
-
-class DetectorLayer2 {
-
-	public double inner_radius, outer_radius, radius;
-	public Color color = Color.GREY;
-	public ArrayList<CollisionPoint> c_points = new ArrayList<CollisionPoint>();
-
-	public DetectorLayer2(double inner_radius, double outer_radius) {
-		this.inner_radius = inner_radius;
-		this.outer_radius = outer_radius;
-		this.radius = (this.outer_radius+this.inner_radius)/2;
-	}
-
-	public DetectorLayer2(double inner_radius, double outer_radius, Color color) {
-		this.inner_radius = inner_radius;
-		this.outer_radius = outer_radius;
-		this.radius = (this.outer_radius+this.inner_radius)/2;
-		this.color = color;
-	}
-
 }

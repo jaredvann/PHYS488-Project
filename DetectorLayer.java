@@ -10,20 +10,6 @@ class DetectorLayer extends Layer {
 	private int bin;
 
 	public DetectorLayer(String _name,
-						 double _radius
-	) {
-		super(_name, _radius, _radius);
-
-		// TODO - resolution and detectors variables for future use
-		r_detectors = z_detectors = 1;
-
-		r_resolution = 2*Math.PI;
-		// z_resolution = 1;
-
-		hits = new ArrayList<Double>();
-	}
-
-	public DetectorLayer(String _name,
 						 double _radius,
 						 double _r_detectors,
 						 double _z_detectors
@@ -31,12 +17,18 @@ class DetectorLayer extends Layer {
 		super(_name, _radius, _radius);
 
 		r_detectors = _r_detectors;
-		// z_detectors = _z_detectors;
+		z_detectors = _z_detectors;
 
 		r_resolution = 2*Math.PI / r_detectors;
-		// z_resolution = 1 / z_detectors;
+		z_resolution = 1 / z_detectors;
 
 		hits = new ArrayList<Double>();
+	}
+
+	public DetectorLayer(String _name,
+						double _radius
+	) {
+		this(_name, _radius, 1, 1);
 	}
 
 	public boolean handle(Particle p) {
@@ -44,5 +36,6 @@ class DetectorLayer extends Layer {
 		return true;
 	}
 
+	public void addHit(double h) { hits.add(h); }
 	public List<Double> getHits() { return hits; }
 }

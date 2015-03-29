@@ -1,9 +1,12 @@
+import javafx.scene.paint.Color;
 
-public abstract class Layer {
+public class Layer {
     protected String name;
 
     protected double start;
     protected double end;
+
+    protected Color color = new Color(0.5,0.5,0.5,1.0);
 
     public Layer(String _name, double _start, double _end) {
         name = _name;
@@ -11,7 +14,9 @@ public abstract class Layer {
         end = _end;
     }
 
-    public abstract boolean handle(Particle p);
+    public boolean handle(Particle p) {
+        return false;
+    }
 
     // ---------- Helpers ----------
 
