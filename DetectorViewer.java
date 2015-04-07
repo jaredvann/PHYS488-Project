@@ -48,8 +48,8 @@ public class DetectorViewer extends Application {
 		// for (double r : coincidence)
 		// 	detector_layers.add(new DetectorLayer("", r));
 
-		for (int i = 0; i < 10; i++) {
-			detector_layers.add(new DetectorLayer("Detector", i*100));
+		for (double r : silicon) {
+			detector_layers.add(new DetectorLayer("Detector", r));
 		}
 
 		importCSVData("data.csv");

@@ -1,19 +1,16 @@
 class FieldLayer extends Layer {
-
 	private double field, stepSize;
 	private int steps = 100;
 
 	public FieldLayer(String _name,
-					   double _start,
-					   double _end,
-					   double _field
-	) {
+					  double _start,
+					  double _end,
+					  double _field) {
 		super(_name, _start, _end);
 
 		field = _field;
 
-		// Overestimate step size as path travelled by particle will be greater than layer thickness
-		stepSize = (end-start) * 1.5 / steps;
+		stepSize = (end - start) * 3 / steps;
 	}
 
 	public boolean handle(Particle p) {
@@ -60,13 +57,12 @@ class FieldLayer extends Layer {
 				pTheta = Math.atan2(pY, pX);
 
 				// Update particle properties
-				p.setPosition(pTheta);
+				p.setPosition(end, pTheta);
 				p.setDirection(pDirection);
-				
+
 				return true;
 			}
 		}
-
 
 		return false;
 	}

@@ -7,16 +7,15 @@ class CoincidenceDetector {
 	public double thickness, range;
 
 	private double midRadius;
-	private double momentum_split, mag_field;
+	private double mag_field;
 
-	public CoincidenceDetector(double radiusA, double radiusB, double thickness) throws IOException {
-		this.config = new Config("config.properties");
-
+	public CoincidenceDetector(double _rA, double _rB, double _thickness) throws IOException {
+		config = new Config("config.properties");
 		mag_field = config.getDouble("magField");
 
-		this.radiusA = radiusA;
-		this.radiusB = radiusB;
-		this.thickness = thickness;
+		radiusA = _rA;
+		radiusB = _rB;
+		thickness = _thickness;
 
 		// These calculations only have to be done once
 		range = radiusB - (radiusA + thickness);
@@ -27,7 +26,7 @@ class CoincidenceDetector {
 		// Find delta angle
 		double delta = Math.abs(Math.atan(radiusB*(angleAtB - angleAtA)/range));
 
-		// Estimate and return momentum
-		return 0.3*mag_field*midRadius/(2*delta);
+		// Estimate and return momentum (*100 to convert GeV -> MeV)
+		return 1000 * 0.3*mag_field*midRadius/(2*delta);
 	}
 }

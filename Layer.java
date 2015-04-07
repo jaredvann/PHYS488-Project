@@ -6,7 +6,7 @@ public class Layer {
     protected double start;
     protected double end;
 
-    protected Color color = new Color(0.5,0.5,0.5,1.0);
+    protected Color color = new Color(0.5, 0.5, 0.5, 1.0);
 
     public Layer(String _name, double _start, double _end) {
         name = _name;

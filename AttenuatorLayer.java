@@ -5,11 +5,11 @@ public class AttenuatorLayer extends Layer {
 
     private Attenuator attn;
 
-    public AttenuatorLayer(String n,
-                           double s,
-                           double e,
+    public AttenuatorLayer(String _name,
+                           double _start,
+                           double _end,
                            Attenuator _attn) {
-        super(n, s, e);
+        super(_name, _start, _end);
 
         stepSize = getThickness() / steps;
         attn = _attn;
