@@ -1,4 +1,3 @@
-
 class Attenuator {
 	private static final int steps = 20;
 

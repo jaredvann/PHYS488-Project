@@ -2,8 +2,7 @@ import java.util.Properties;
 import java.io.*;
 
 class Config {
-
-	static Properties config = new Properties();
+	private static Properties config = new Properties();
 
 	public Config(String fp) throws IOException {
 		try {

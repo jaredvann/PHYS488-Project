@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.TreeMap;
 import java.util.SortedMap;
 
@@ -6,7 +7,7 @@ public class Particle {
     private double momentum; // MeV
     private double direction; // Radians
     private double azimuth; // Radians
-    private double charge; // Elementary units?
+    private double charge; // e (Charge on an electron)
 
     private SortedMap<Double, Double> trace;
 
@@ -32,6 +33,21 @@ public class Particle {
             p.getDirection(),
             p.getAzimuth()
         );
+    }
+
+    // ---------- Handlers ----------
+
+    public boolean handle(List<Layer> layers) {
+        // Send the muon through all the layers in the accelerator
+        for (Layer layer : layers) {
+            if (momentum <= 0)
+                return false;
+
+            if (layer.handle(this) == false)
+                return false;
+        }
+
+        return true;
     }
 
     // ---------- Helpers ----------

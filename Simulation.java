@@ -1,90 +1,82 @@
 // Import statements
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
-
-import java.io.FileWriter;
-import java.io.FileNotFoundException;
-
-import histogram.Histogram;
-
-import java.util.Arrays;
 
 /**
  * Let's get our simulation on!
  */
 public class Simulation {
-    private static PrintWriter screen;
     private static Config config;
+    private static PrintWriter screen;
 
     private static ParticleFactory factory;
-    private static CoincidenceDetector cd;
-
-    private static Attenuator beryllium_attn, silicon_attn;
-
-    private static List<DetectorLayer> detector_layers = new ArrayList<DetectorLayer>();
-	private static List<Layer> layers = new ArrayList<Layer>();
-
     private static Particle[] particles;
+
+    private static List<DetectorLayer> detector_layers;
+	private static List<Layer> layers;
 
     public static void main(String[] args) throws IOException {
         // Setup Config & PrintWriter instances
-        screen = new PrintWriter(System.out, true);
         config = new Config("config.properties");
-
-        // How many particles should we simulate?
-        int count = config.getInt("numParticles");
-
-        // Initialize the muon array and get a new MuonFactory instance
-        particles = new Particle[count];
+        screen = new PrintWriter(System.out, true);
 
         // Only generate muons so only muon mass needed
         double[] masses = new double[] { 106 }; // MeV/c^2
         factory = new ParticleFactory(
-            config.getDouble("minMomentum"),
-            config.getDouble("maxMomentum"),
-            masses);
-
-        // Set up the Coincidence Detector
-        cd = new CoincidenceDetector(
-            config.getDouble("coincidenceDetectorRadiusA"),
-            config.getDouble("coincidenceDetectorRadiusB"),
-            0.05
+            config.getDouble("momentum"),
+            config.getDouble("momentum_smear"),
+            masses
         );
 
-        // Add beryllium attenuator and beam pipe layer with 20 steps
-        beryllium_attn = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
-        layers.add(new AttenuatorLayer(
-            "Beryllium Beam Pipe",
-            3.5,
-            3.7,
-            beryllium_attn
-        ));
+        // How many particles should we simulate?
+        int count = config.getInt("num_particles");
+        particles = new Particle[count];
 
-        // // Radii and thickness of silicon detector layers
+        // Initialize layer arrays
+        detector_layers = new ArrayList<DetectorLayer>();
+        layers          = new ArrayList<Layer>();
+
+        // Radii and thickness of layers
         double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70 };
         double sdt = 0.05; // cm
 
-        // Add silicon attenuator instance
-        silicon_attn = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+        // Initialise beryllium/silicon attenuators
+        Attenuator beryllium_attn = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
+        Attenuator silicon_attn = new Attenuator(14, 28.0855, 2.3290, sdt/20);
+
+        // Add beryllium beam pipe
+        layers.add(
+            new AttenuatorLayer(
+                "Beryllium Beam Pipe",
+                3.5,
+                3.7,
+                beryllium_attn
+            )
+        );
 
         // Add silicon detectors
         for (double r : sdr) {
-            detector_layers.add(new DetectorLayer(
-                "S_"+String.valueOf(r),
-                r,
-                (r + sdt),
-                silicon_attn
-            ));
+            detector_layers.add(
+                new DetectorLayer(
+                    "S_"+String.valueOf(r),
+                    r,
+                    (r + sdt),
+                    silicon_attn
+                )
+            );
         }
 
+        // Add coincidence detectors
         detector_layers.add(new DetectorLayer("CoincidenceDetector_1", 90, 90.05, silicon_attn));
 		detector_layers.add(new DetectorLayer("CoincidenceDetector_2", 91, 91.05, silicon_attn));
 
         // Add additional vacuum layers and sort into correct order
-        setupLayers();
+        setup_layers();
 
         // Run a simulation for each of the muons
         Particle particle = factory.newParticle();
@@ -95,100 +87,91 @@ public class Simulation {
             // particle = factory.newParticle();
             particles[i] = new Particle(particle);
 
-            // TODO - Could do with refactoring into own method
-            // Send the muon through all the layers in the accelerator
-            for (Layer layer : layers) {
-                if (particle.getMomentum() > 0) {
-                    if (layer.handle(particle) == false){
-                        System.out.println("ERR");
-                        break particleloop;
-                    }
-                } else {
-                    System.out.println("\t[!] Muon " + (i+1) + " Stopped @ " + layer.getName());
-                    break particleloop;
-                }
+            // Send particle through the layers
+            boolean err = !particle.handle(layers);
+            if (err) {
+                screen.println("[!] Particle " + (i+1) + " Stopped!");
+                break;
             }
 
             // Use the --last two-- detectors as the Coinicdence Detector.
-            if (particle.getMomentum() > 0)
-                trigger(particle, i);
+            if (particle.getMomentum() > 0) {
+                double est = estimate_momentum(particle, config.getDouble("cd_resolution"));
+
+                screen.println("[*] Actual momentum: " + particle.getMomentum());
+                screen.println("[*] Predicted momentum: " + est);
+                screen.println("[*] QOP: " + (int) (est * 100 / particle.getMomentum()) + "%");
+            }
         }
 
-        writeToDisk("data.csv");
+        write_to_disk("data.csv");
     }
 
+    // ---------- Handlers ----------
 
-    public static void trigger(Particle particle, int i) {
+    public static double estimate_momentum(Particle particle, double res) {
+        // Get Coincidence Deteector properties
+        double mag_field = config.getDouble("mag_field");
+        double radius_a  = config.getDouble("cd_radius_a");
+        double radius_b  = config.getDouble("cd_radius_b");
+        double thickness = config.getDouble("cd_thickness");
+        double range     = radius_b - (radius_a + thickness);
+
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
-
-        // I have smeared the results slightly using Helpers.gauss
+        // The results slightly using Helpers.gauss
         // --- This approximately simulates the resolution of the detectors
-        double angleAtA = Helpers.gauss(particle.getTrace().get(90.05), 1/(400*Math.PI));
-        double angleAtB = Helpers.gauss(particle.getTrace().get(91.00), 1/(400*Math.PI));
+        double angle_a =
+            Helpers.gauss(particle.getTrace().get(radius_a + thickness), res);
+        double angle_b =
+            Helpers.gauss(particle.getTrace().get(radius_b), res);
 
-        // Return the momentum estimated by the coincidence detector
-        double estMomentum = cd.estimateMomentum(angleAtA, angleAtB);
+        // Estimate particle momentum (*1000 to convert GeV -> MeV)
+        double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
+		double momentum_est = 1000 * 0.3 * mag_field * radius_a / (2*delta);
 
-        screen.println("[*] Actual momentum: " + particles[i].getMomentum());
-        screen.println("[*] Predicted momentum: " + estMomentum);
-        screen.println("[*] QOP: " + (int) (estMomentum*100 / particles[i].getMomentum()) + "%");
-
-        double cdMinMomentum = config.getDouble("coincidenceMinMomentum");
-        double cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
-
-        // Check to see if this particle has the required momentum
-        if (estMomentum > cdMinMomentum && estMomentum < cdMaxMomentum) {
-            screen.println("[x] Muon " + (i+1) + " has momentum within bounds!");
-        } else {
-            screen.println("[!] Muon " + (i+1) + " has momentum out of bounds!");
-        }
+        return momentum_est;
     }
 
-
-    private static void setupLayers() {
+    private static void setup_layers() {
 		// Add detector layers
 		layers.addAll(detector_layers);
-
-		// Initial layer sort
-		orderLayers();
+        order_layers();
 
 		// Add vacuum layers to fill in gaps between physical layers
 		ArrayList<Layer> layers2 = new ArrayList<Layer>();
-		double last = 0.0;
 
+        double last = 0.0;
 		for (Layer l : layers) {
-			if (l.getStart() > last) {
-				layers2.add(new FieldLayer(
+			layers2.add(
+                new FieldLayer(
                     "V-"+String.valueOf(last),
-					last,
-					l.getStart(),
-                    config.getDouble("magField")
-				));
-			}
+    				last,
+    				l.getStart(),
+                    config.getDouble("mag_field")
+    			)
+            );
+
 			last = l.getEnd();
 		}
 
 		// Add vacuum (field) layers
 		layers.addAll(layers2);
-
-		// Final layer sort
-		orderLayers();
+		order_layers();
 	}
 
-	private static void orderLayers() {
+	private static void order_layers() {
 		// Sort layers in order of ascending radius
 		layers.sort(new Comparator<Layer>() {
 			@Override
 			public int compare(Layer l1, Layer l2) {
-				Double r1 = l1.start;
-				return r1.compareTo(l2.start);
+				return (new Double(l1.getStart())).compareTo(l2.getStart());
 			}
 		});
 	}
 
-    static public boolean writeToDisk(String filepath) throws IOException {
+    private static boolean write_to_disk(String filepath) throws IOException {
         FileWriter file;
         PrintWriter toFile = null;
 
@@ -197,11 +180,8 @@ public class Simulation {
             toFile = new PrintWriter(file); // File writer
 
             for (DetectorLayer dl : detector_layers) {
-				for (double angle : dl.getHits()) {
+				for (double angle : dl.getHits())
 					toFile.print(angle);
-				}
-
-                toFile.print("\n");
 			}
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());

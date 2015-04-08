@@ -1,6 +1,8 @@
 class FieldLayer extends Layer {
-	private double field, stepSize;
-	private int steps = 100;
+	private static int steps = 100;
+
+	private double field;
+	private double step_size;
 
 	public FieldLayer(String _name,
 					  double _start,
@@ -10,29 +12,26 @@ class FieldLayer extends Layer {
 
 		field = _field;
 
-		stepSize = (end - start) * 3 / steps;
+		step_size = (end - start) * 3 / steps;
 	}
 
 	public boolean handle(Particle p) {
-		double pX, pY, pAzimuth, pRadius, pDirection, pCharge;
+		double pX, pY;
 		double lX, lY, lTheta;
-		double trajectoryRadius, theta;
-
-		// Set particle radius to inside edge of field layer
-		pRadius = start;
+		double trajectoryRadius;
 
 		// Store particle properties as local variables
-		pAzimuth = p.getAzimuth();
-		pDirection = p.getDirection();
-		pCharge = p.getCharge();
+		double pAzimuth   = p.getAzimuth();
+		double pDirection = p.getDirection();
+		double pCharge    = p.getCharge();
 
 		// Find the angle the particle momentum is changed by through one step
 		// 1000 is to convert into GeV/c
-		theta = stepSize * 1000 * 0.3 * field / p.getMomentum();
+		double theta = (step_size * 1000 * 0.3 * field) / p.getMomentum();
 
 		// Convert particle azimuthal angle into cartesian coordinates
-		pX = pRadius*Math.cos(pAzimuth);
-		pY = pRadius*Math.sin(pAzimuth);
+		pX = start * Math.cos(pAzimuth);
+		pY = start * Math.sin(pAzimuth);
 
 		for (int i = 0; i < steps; i++) {
 			// Calculate the angle of 'L'
@@ -40,8 +39,8 @@ class FieldLayer extends Layer {
 
 			// Create 'L' vector in cartesian coordinates
 			// 'L' is the straight line distance the particle moves in the step
-			lX = stepSize*Math.cos(lTheta);
-			lY = stepSize*Math.sin(lTheta);
+			lX = step_size * Math.cos(lTheta);
+			lY = step_size * Math.sin(lTheta);
 
 			// Add L to the particle position
 			pX = pX + lX;

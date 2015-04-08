@@ -14,9 +14,9 @@ public class Layer {
         end = _end;
     }
 
-    public boolean handle(Particle p) {
-        return false;
-    }
+    // ---------- Handlers ----------
+
+    public boolean handle(Particle p) { return false; }
 
     // ---------- Helpers ----------
 
