@@ -19,7 +19,7 @@ public class AttenuatorLayer extends Layer {
         double mass = particle.getMass();
         double momentum = particle.getMomentum();
         double direction = particle.getDirection();
-        double position = particle.getPosition();
+        double azimuth = particle.getAzimuth();
 
         double theta;
         double distance;
@@ -30,7 +30,7 @@ public class AttenuatorLayer extends Layer {
 
             momentum -= attn.getEnergyLoss(mass, momentum) * Math.abs(distance);
             direction += theta;
-            position += stepSize * Math.tan(theta);
+            azimuth += stepSize * Math.tan(theta);
 
             if (momentum <= 0) {
                 momentum = 0;
@@ -40,7 +40,7 @@ public class AttenuatorLayer extends Layer {
 
         particle.setMomentum(momentum);
         particle.setDirection(direction);
-        particle.setPosition(end, position);
+        particle.setAzimuth(end, azimuth);
 
         return true;
     }

@@ -125,8 +125,8 @@ public class Simulation {
 
         // I have smeared the results slightly using Helpers.gauss
         // --- This approximately simulates the resolution of the detectors
-        double angleAtA = Helpers.gauss(particle.getPositions().get(90.05), 1/(400*Math.PI));
-        double angleAtB = Helpers.gauss(particle.getPositions().get(91.00), 1/(400*Math.PI));
+        double angleAtA = Helpers.gauss(particle.getTrace().get(90.05), 1/(400*Math.PI));
+        double angleAtB = Helpers.gauss(particle.getTrace().get(91.00), 1/(400*Math.PI));
 
         // Return the momentum estimated by the coincidence detector
         double estMomentum = cd.estimateMomentum(angleAtA, angleAtB);
@@ -137,8 +137,6 @@ public class Simulation {
 
         double cdMinMomentum = config.getDouble("coincidenceMinMomentum");
         double cdMaxMomentum = config.getDouble("coincidenceMaxMomentum");
-
-        // screen.println(particles[i].getPositions());
 
         // Check to see if this particle has the required momentum
         if (estMomentum > cdMinMomentum && estMomentum < cdMaxMomentum) {

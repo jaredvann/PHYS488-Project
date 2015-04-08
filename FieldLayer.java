@@ -14,7 +14,7 @@ class FieldLayer extends Layer {
 	}
 
 	public boolean handle(Particle p) {
-		double pX, pY, pTheta, pRadius, pDirection, pCharge;
+		double pX, pY, pAzimuth, pRadius, pDirection, pCharge;
 		double lX, lY, lTheta;
 		double trajectoryRadius, theta;
 
@@ -22,7 +22,7 @@ class FieldLayer extends Layer {
 		pRadius = start;
 
 		// Store particle properties as local variables
-		pTheta = p.getPosition();
+		pAzimuth = p.getAzimuth();
 		pDirection = p.getDirection();
 		pCharge = p.getCharge();
 
@@ -30,9 +30,9 @@ class FieldLayer extends Layer {
 		// 1000 is to convert into GeV/c
 		theta = stepSize * 1000 * 0.3 * field / p.getMomentum();
 
-		// Convert particle position into cartesian coordinates
-		pX = pRadius*Math.cos(pTheta);
-		pY = pRadius*Math.sin(pTheta);
+		// Convert particle azimuthal angle into cartesian coordinates
+		pX = pRadius*Math.cos(pAzimuth);
+		pY = pRadius*Math.sin(pAzimuth);
 
 		for (int i = 0; i < steps; i++) {
 			// Calculate the angle of 'L'
@@ -53,11 +53,10 @@ class FieldLayer extends Layer {
 			// End loop if particle leaves field layer
 			if ((pX*pX + pY*pY) >= end*end) {
 				// Convert particle position back into polar coordinates
-				pRadius = pX*pX + pY*pY;
-				pTheta = Math.atan2(pY, pX);
+				pAzimuth = Math.atan2(pY, pX);
 
 				// Update particle properties
-				p.setPosition(end, pTheta);
+				p.setAzimuth(end, pAzimuth);
 				p.setDirection(pDirection);
 
 				return true;

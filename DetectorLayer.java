@@ -39,7 +39,7 @@ class DetectorLayer extends AttenuatorLayer {
 
 	@Override
 	public boolean handle(Particle p) {
-		addHit(p.getPosition());
+		addHit(p.getAzimuth());
 
 		return super.handle(p);
 	}

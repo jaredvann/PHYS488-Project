@@ -5,24 +5,24 @@ public class Particle {
     private double mass; // MeV
     private double momentum; // MeV
     private double direction; // Radians
-    private double position; // Radians
+    private double azimuth; // Radians
     private double charge; // Elementary units?
 
-    private SortedMap<Double, Double> positions;
+    private SortedMap<Double, Double> trace;
 
     public Particle(double _mass,
                     double _momentum,
                     double _direction,
-                    double _position) {
+                    double _azimuth) {
         mass = _mass;
         momentum = _momentum;
         direction = _direction;
-        position = _position;
+        azimuth = _azimuth;
 
         charge = 1;
 
-        this.positions = new TreeMap<Double, Double>();
-        this.positions.put(0.0, 0.0);
+        this.trace = new TreeMap<Double, Double>();
+        this.trace.put(0.0, 0.0);
     }
 
     public Particle(Particle p) {
@@ -30,14 +30,14 @@ public class Particle {
             p.getMass(),
             p.getMomentum(),
             p.getDirection(),
-            p.getPosition()
+            p.getAzimuth()
         );
     }
 
     // ---------- Helpers ----------
 
-    public double getX(double radius) { return radius * Math.cos(position); }
-    public double getY(double radius) { return radius * Math.sin(position); }
+    public double getX(double radius) { return radius * Math.cos(azimuth); }
+    public double getY(double radius) { return radius * Math.sin(azimuth); }
 
     // ---------- Getters & Setters ----------
 
@@ -50,15 +50,15 @@ public class Particle {
     public double getDirection() { return direction; }
     public void setDirection(double _direction) { direction = _direction; }
 
-    public double getPosition() { return position; }
-    public void setPosition(double _position) { position = _position; }
+    public double getAzimuth() { return azimuth; }
+    public void setAzimuth(double _azimuth) { azimuth = _azimuth; }
+    public void setAzimuth(double _radius, double _azimuth) {
+        azimuth = _azimuth;
+        trace.put(_radius, _azimuth);
+    }
 
     public double getCharge() { return charge; }
     public void setCharge(double _charge) { charge = _charge; }
 
-    public SortedMap<Double, Double> getPositions() { return positions; }
-    public void setPosition(double _radius, double _position) {
-        position = _position;
-        this.positions.put(_radius, _position);
-    }
+    public SortedMap<Double, Double> getTrace() { return trace; }
 }
