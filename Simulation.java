@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.text.DecimalFormat;
 
 /**
  * Let's get our simulation on!
@@ -78,19 +79,23 @@ public class Simulation {
         // Add additional vacuum layers and sort into correct order
         setup_layers();
 
-        // Run a simulation for each of the muons
-        Particle particle = factory.newParticle();
+        // Display the particle info as a table
+        // Start with the formatting and header
+        String left_align_format = "| %-2d | %-9.2f | %-10.2f | %-5.1f%% |%n";
+
+        screen.format("\n+----+-----------+------------+--------+%n");
+        screen.printf("| ID | Momentum  | Estimation | QOP    |%n");
+        screen.format("+----+-----------+------------+--------+%n");
 
         particleloop:
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
-            // particle = factory.newParticle();
+            Particle particle = factory.newParticle();
             particles[i] = new Particle(particle);
 
             // Send particle through the layers
             boolean err = !particle.handle(layers);
             if (err) {
-                screen.println("[!] Particle " + (i+1) + " Stopped!");
                 break;
             }
 
@@ -98,11 +103,17 @@ public class Simulation {
             if (particle.getMomentum() > 0) {
                 double est = estimate_momentum(particle, config.getDouble("cd_resolution"));
 
-                screen.println("[*] Actual momentum: " + particle.getMomentum());
-                screen.println("[*] Predicted momentum: " + est);
-                screen.println("[*] QOP: " + (int) (est * 100 / particle.getMomentum()) + "%");
+                screen.format(
+                    left_align_format,
+                    i+1,
+                    particle.getMomentum(),
+                    est,
+                    (est * 100 / particle.getMomentum())
+                );
             }
         }
+
+        screen.format("+----+-----------+------------+--------+%n\n");
 
         write_to_disk("data.csv");
     }
