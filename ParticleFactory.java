@@ -1,30 +1,34 @@
 import java.util.Random;
 
 class ParticleFactory {
-	private Random random;
+    private Random random;
 
-	private double[] masses;
+    private double[] masses;
 
-	private double momentum;
-	private double smear;
+    private double momentum;
+    private double smear;
 
-	public ParticleFactory(double _momentum, double _smear, double[] _masses)  {
-		random = new Random();
+    public ParticleFactory(double _momentum, double _smear, double[] _masses)  {
+        random = new Random();
 
-		momentum = _momentum;
-		smear = _smear;
+        momentum = _momentum;
+        smear = _smear;
 
-		masses = _masses;
-	}
+        masses = _masses;
+    }
 
-	public Particle newParticle() {
-		double momentum = Helpers.gauss(this.momentum, this.momentum * smear);
+    public Particle newParticle() {
+        return newParticle(masses[random.nextInt(masses.length)]);
+    }
 
-		return new Particle(
-			masses[random.nextInt(masses.length)],
-			momentum,
-			random.nextDouble()*(2*Math.PI),
-			0
-		);
-	}
+    public Particle newParticle(double mass) {
+        double momentum = Helpers.gauss(this.momentum, this.momentum * smear);
+
+        return new Particle(
+            mass,
+            momentum,
+            random.nextDouble()*(2*Math.PI),
+            0
+        );
+    }
 }

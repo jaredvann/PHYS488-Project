@@ -1,6 +1,6 @@
-
 public class AttenuatorLayer extends Layer {
-    private static final int steps = 20;
+    private static final int STEPS = 20;
+
     private double stepSize;
 
     private Attenuator attn;
@@ -11,7 +11,7 @@ public class AttenuatorLayer extends Layer {
                            Attenuator _attn) {
         super(_name, _start, _end);
 
-        stepSize = getThickness() / steps;
+        stepSize = getThickness() / STEPS;
         attn = _attn;
     }
 
@@ -24,8 +24,8 @@ public class AttenuatorLayer extends Layer {
         double theta;
         double distance;
 
-        for (int i = 0; i < steps; i++) {
-            theta = Helpers.gauss(0, attn.getMCSTheta0(mass, momentum));
+        for (int i = 0; i < STEPS; i++) {
+            theta = Helpers.gauss(0, attn.getTheta(mass, momentum));
             distance = stepSize / Math.cos(theta); // Hypotenuse
 
             momentum -= attn.getEnergyLoss(mass, momentum) * Math.abs(distance);

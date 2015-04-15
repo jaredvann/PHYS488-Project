@@ -8,7 +8,7 @@ class Helpers {
 
 	public static final int CHARGE_ELECTRON = 1; // 1.60E-19 C
 
-	public static final double SPEED_OF_LIGHT = 3E8;
+	public static final double SPEED_OF_LIGHT = 2.99792458E8;
 
 	public static double beta(double mass, double momentum) {
 		return momentum / energy(mass, momentum);
@@ -36,17 +36,4 @@ class Helpers {
 
 		return xmean + sigma*(sum-6);
 	}
-
-	// If input is positive returns 1, else returns -1
-	public static double isPos(double a) {
-		if (a >= 0 ) { return 1; }
-		else { return -1; }
-	}
-
-	// Converts mass from MeV/c^2 into kg
-	public static double mevc2ToKg(double m) {
-		return 1.780E-30 * m;
-	}
-
-
 }

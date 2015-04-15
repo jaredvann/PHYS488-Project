@@ -73,19 +73,22 @@ public class Simulation {
         }
 
         // Add coincidence detectors
-        detector_layers.add(new DetectorLayer("CoincidenceDetector_1", 90, 90.05, silicon_attn));
-		detector_layers.add(new DetectorLayer("CoincidenceDetector_2", 91, 91.05, silicon_attn));
+        double radius_a  = config.getDouble("cd_radius_a");
+        double radius_b  = config.getDouble("cd_radius_b");
+        double thickness = config.getDouble("cd_thickness");
+        detector_layers.add(new DetectorLayer("CoincidenceDetector_1", radius_a, (radius_a+thickness), silicon_attn));
+		detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
 
         // Add additional vacuum layers and sort into correct order
         setup_layers();
 
         // Display the particle info as a table
         // Start with the formatting and header
-        String left_align_format = "| %-2d | %-9.2f | %-10.2f | %-5.1f%% |%n";
+        String left_align_format = "| %-2d | %-16.2f | %-14.2f | %-10.2f | %-3.1f%%  |%n";
 
-        screen.format("\n+----+-----------+------------+--------+%n");
-        screen.printf("| ID | Momentum  | Estimation | QOP    |%n");
-        screen.format("+----+-----------+------------+--------+%n");
+        screen.format("+----+------------------+----------------+------------+--------+%n");
+        screen.printf("| ID | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+        screen.format("+----+------------------+----------------+------------+--------+%n");
 
         particleloop:
         for (int i = 0; i < count; i++) {
@@ -93,11 +96,9 @@ public class Simulation {
             Particle particle = factory.newParticle();
             particles[i] = new Particle(particle);
 
-            // Send particle through the layers
-            boolean err = !particle.handle(layers);
-            if (err) {
+            // Send particle through the layers and report any errors
+            if (!particle.handle(layers))
                 break;
-            }
 
             // Use the --last two-- detectors as the Coinicdence Detector.
             if (particle.getMomentum() > 0) {
@@ -106,6 +107,7 @@ public class Simulation {
                 screen.format(
                     left_align_format,
                     i+1,
+                    particles[i].getMomentum(),
                     particle.getMomentum(),
                     est,
                     (est * 100 / particle.getMomentum())
@@ -113,7 +115,7 @@ public class Simulation {
             }
         }
 
-        screen.format("+----+-----------+------------+--------+%n\n");
+        screen.format("+----+------------------+----------------+------------+--------+%n");
 
         write_to_disk("data.csv");
     }
@@ -131,8 +133,8 @@ public class Simulation {
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
-        // The results slightly using Helpers.gauss
-        // --- This approximately simulates the resolution of the detectors
+        // The results slightly smeared using Helpers.gauss
+        // --- This kind of simulates the resolution of the detectors?
         double angle_a =
             Helpers.gauss(particle.getTrace().get(radius_a + thickness), res);
         double angle_b =
@@ -140,7 +142,7 @@ public class Simulation {
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
-		double momentum_est = 1000 * 0.3 * mag_field * radius_a / (2*delta);
+		double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
 
         return momentum_est;
     }
@@ -191,9 +193,10 @@ public class Simulation {
             toFile = new PrintWriter(file); // File writer
 
             for (DetectorLayer dl : detector_layers) {
-				for (double angle : dl.getHits())
-					toFile.print(angle);
-			}
+                for (double angle : dl.getHits())
+                    toFile.print(angle+",");
+                toFile.println();
+            }
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
             return false;

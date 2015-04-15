@@ -45,15 +45,13 @@ public class DetectorViewer extends Application {
 		for (double r : coincidence)
 			layers.add(new Layer("", r, r+1));
 
-		// for (double r : coincidence)
-		// 	detector_layers.add(new DetectorLayer("", r));
-
-		for (double r : silicon) {
+		for (double r : silicon)
 			detector_layers.add(new DetectorLayer("Detector", r));
-		}
+
+		for (double r : coincidence)
+			detector_layers.add(new DetectorLayer("CoincidenceDetector", r));
 
 		importCSVData("data.csv");
-
 
 		launch(args);
 	}
