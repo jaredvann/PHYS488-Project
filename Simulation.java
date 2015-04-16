@@ -19,7 +19,7 @@ public class Simulation {
     private static Particle[] particles;
 
     private static List<DetectorLayer> detector_layers;
-	private static List<Layer> layers;
+    private static List<Layer> layers;
 
     public static void main(String[] args) throws IOException {
         // Setup Config & PrintWriter instances
@@ -77,7 +77,7 @@ public class Simulation {
         double radius_b  = config.getDouble("cd_radius_b");
         double thickness = config.getDouble("cd_thickness");
         detector_layers.add(new DetectorLayer("CoincidenceDetector_1", radius_a, (radius_a+thickness), silicon_attn));
-		detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
+        detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
 
         // Add additional vacuum layers and sort into correct order
         setup_layers();
@@ -90,19 +90,25 @@ public class Simulation {
         screen.printf("| ID | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
         screen.format("+----+------------------+----------------+------------+--------+%n");
 
-        particleloop:
+        double[][] toSave = new double[count][];
         for (int i = 0; i < count; i++) {
             // We'll remember the original muon details for safe-keeping
             Particle particle = factory.newParticle();
             particles[i] = new Particle(particle);
+            toSave[i] = new double[4];
 
             // Send particle through the layers and report any errors
             if (!particle.handle(layers))
-                break;
+                continue;
 
             // Use the --last two-- detectors as the Coinicdence Detector.
             if (particle.getMomentum() > 0) {
                 double est = estimate_momentum(particle, config.getDouble("cd_resolution"));
+
+                toSave[i][0] = i+1;
+                toSave[i][1] = particles[i].getMomentum();
+                toSave[i][2] = particle.getMomentum();
+                toSave[i][3] = est;
 
                 screen.format(
                     left_align_format,
@@ -117,7 +123,8 @@ public class Simulation {
 
         screen.format("+----+------------------+----------------+------------+--------+%n");
 
-        write_to_disk("data.csv");
+        write_to_disk("data.csv", toSave);
+        exportViewerData();
     }
 
     // ---------- Handlers ----------
@@ -135,56 +142,64 @@ public class Simulation {
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a =
-            Helpers.gauss(particle.getTrace().get(radius_a + thickness), res);
-        double angle_b =
-            Helpers.gauss(particle.getTrace().get(radius_b), res);
+        double angle_a = Helpers.gauss(particle.getTrace().get(radius_a + thickness), res);
+        double angle_b = Helpers.gauss(particle.getTrace().get(radius_b), res);
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
-		double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
+        double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
 
         return momentum_est;
     }
 
     private static void setup_layers() {
-		// Add detector layers
-		layers.addAll(detector_layers);
+        // Add detector layers
+        layers.addAll(detector_layers);
         order_layers();
 
-		// Add vacuum layers to fill in gaps between physical layers
-		ArrayList<Layer> layers2 = new ArrayList<Layer>();
+        // Add vacuum layers to fill in gaps between physical layers
+        ArrayList<Layer> layers2 = new ArrayList<Layer>();
 
         double last = 0.0;
-		for (Layer l : layers) {
-			layers2.add(
+        for (Layer l : layers) {
+            layers2.add(
                 new FieldLayer(
                     "V-"+String.valueOf(last),
-    				last,
-    				l.getStart(),
+                    last,
+                    l.getStart(),
                     config.getDouble("mag_field")
-    			)
+                )
             );
 
-			last = l.getEnd();
-		}
+            last = l.getEnd();
+        }
 
-		// Add vacuum (field) layers
-		layers.addAll(layers2);
-		order_layers();
-	}
+        // Add vacuum (field) layers
+        layers.addAll(layers2);
+        order_layers();
+    }
 
-	private static void order_layers() {
-		// Sort layers in order of ascending radius
-		layers.sort(new Comparator<Layer>() {
-			@Override
-			public int compare(Layer l1, Layer l2) {
-				return (new Double(l1.getStart())).compareTo(l2.getStart());
-			}
-		});
-	}
+    private static void order_layers() {
+        // Sort layers in order of ascending radius
+        layers.sort(new Comparator<Layer>() {
+            @Override
+            public int compare(Layer l1, Layer l2) {
+                return (new Double(l1.getStart())).compareTo(l2.getStart());
+            }
+        });
+    }
 
-    private static boolean write_to_disk(String filepath) throws IOException {
+    private static void exportViewerData() throws IOException {
+        double[][] layers = new double[detector_layers.size()][];
+        for (int i = 0; i < layers.length; i++) {
+            layers[i] = new double[detector_layers.get(i).getHits().size()];
+            for (int j = 0; j < layers[i].length; j++)
+                layers[i][j] = detector_layers.get(i).getHits().get(j);
+        }
+        write_to_disk("layers.csv", layers);
+    }
+
+    private static boolean write_to_disk(String filepath, double[][] data) throws IOException {
         FileWriter file;
         PrintWriter toFile = null;
 
@@ -192,9 +207,9 @@ public class Simulation {
             file = new FileWriter(filepath); // File stream
             toFile = new PrintWriter(file); // File writer
 
-            for (DetectorLayer dl : detector_layers) {
-                for (double angle : dl.getHits())
-                    toFile.print(angle+",");
+            for (double[] line : data) {
+                for (double item : line)
+                    toFile.print(item + ",");
                 toFile.println();
             }
         } catch (FileNotFoundException e) {
