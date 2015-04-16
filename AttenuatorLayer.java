@@ -1,5 +1,5 @@
 public class AttenuatorLayer extends Layer {
-    private static final int STEPS = 20;
+    private static final int STEPS = 40;
 
     private double stepSize;
 

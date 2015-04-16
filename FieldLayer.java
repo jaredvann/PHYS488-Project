@@ -12,7 +12,7 @@ class FieldLayer extends Layer {
 
         field = _field;
 
-        stepSize = (end - start) * 3 / STEPS;
+        stepSize = (end - start) / STEPS;
     }
 
     public boolean handle(Particle p) {
@@ -33,7 +33,7 @@ class FieldLayer extends Layer {
         pX = start * Math.cos(pAzimuth);
         pY = start * Math.sin(pAzimuth);
 
-        for (int i = 0; i < STEPS; i++) {
+        for (int i = 0; i < 5*STEPS; i++) {
             // Calculate the angle of 'L'
             lTheta = pDirection + theta*-pCharge/2;
 

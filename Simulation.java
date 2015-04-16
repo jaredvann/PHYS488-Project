@@ -98,27 +98,30 @@ public class Simulation {
             toSave[i] = new double[4];
 
             // Send particle through the layers and report any errors
+            boolean stopped = false;
             if (!particle.handle(layers))
-                continue;
+                stopped = true;
 
-            // Use the --last two-- detectors as the Coinicdence Detector.
-            if (particle.getMomentum() > 0) {
-                double est = estimate_momentum(particle, config.getDouble("cd_resolution"));
+            // Use the --last two-- detectors as the track trigger.
+            double est;
+            if (particle.getMomentum() > 0 && stopped == false)
+                est = estimate_momentum(particle, config.getDouble("cd_resolution"));
+            else
+                est = 0;
 
-                toSave[i][0] = i+1;
-                toSave[i][1] = particles[i].getMomentum();
-                toSave[i][2] = particle.getMomentum();
-                toSave[i][3] = est;
+            toSave[i][0] = i+1;
+            toSave[i][1] = particles[i].getMomentum();
+            toSave[i][2] = particle.getMomentum();
+            toSave[i][3] = est;
 
-                screen.format(
-                    left_align_format,
-                    i+1,
-                    particles[i].getMomentum(),
-                    particle.getMomentum(),
-                    est,
-                    (est * 100 / particle.getMomentum())
-                );
-            }
+            screen.format(
+                left_align_format,
+                i+1,
+                particles[i].getMomentum(),
+                particle.getMomentum(),
+                est,
+                (est * 100 / particle.getMomentum())
+            );
         }
 
         screen.format("+----+------------------+----------------+------------+--------+%n");
@@ -193,9 +196,12 @@ public class Simulation {
         double[][] layers = new double[detector_layers.size()][];
         for (int i = 0; i < layers.length; i++) {
             layers[i] = new double[detector_layers.get(i).getHits().size()];
-            for (int j = 0; j < layers[i].length; j++)
+
+            for (int j = 0; j < layers[i].length; j++) {
                 layers[i][j] = detector_layers.get(i).getHits().get(j);
+            }
         }
+
         write_to_disk("layers.csv", layers);
     }
 
@@ -210,7 +216,8 @@ public class Simulation {
             for (double[] line : data) {
                 for (double item : line)
                     toFile.print(item + ",");
-                toFile.println();
+
+                if (line.length > 0) toFile.println();
             }
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());

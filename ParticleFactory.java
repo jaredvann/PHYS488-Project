@@ -26,7 +26,7 @@ class ParticleFactory {
 
         return new Particle(
             mass,
-            momentum,
+            Math.abs(momentum),
             random.nextDouble()*(2*Math.PI),
             0
         );
