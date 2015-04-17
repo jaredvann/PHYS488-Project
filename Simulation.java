@@ -12,36 +12,139 @@ import java.text.DecimalFormat;
  * Let's get our simulation on!
  */
 public class Simulation {
-    private static Config config;
-    private static PrintWriter screen;
+    private Config config;
 
-    private static ParticleFactory factory;
-    private static Particle[] particles;
+    public ParticleFactory factory;
 
-    private static List<DetectorLayer> detector_layers;
-    private static List<Layer> layers;
+    public List<DetectorLayer> detector_layers;
+    public List<Layer> layers;
 
-    public static void main(String[] args) throws IOException {
+    public Simulation() throws IOException {
         // Setup Config & PrintWriter instances
         config = new Config("config.properties");
-        screen = new PrintWriter(System.out, true);
 
         // Only generate muons so only muon mass needed
-        double[] masses = new double[] { 106 }; // MeV/c^2
+        double[] masses = config.getDoubles("masses"); // MeV/c^2
         factory = new ParticleFactory(
             config.getDouble("momentum"),
             config.getDouble("momentum_smear"),
             masses
         );
 
-        // How many particles should we simulate?
-        int count = config.getInt("num_particles");
-        particles = new Particle[count];
-
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
         layers          = new ArrayList<Layer>();
+        generateLayers();
+    }
 
+    public static void main(String[] args) throws IOException {
+        PrintWriter screen = new PrintWriter(System.out, true);
+
+        Simulation sim = new Simulation();
+        Config cfg = sim.getConfig();
+
+        // How many particles are we simulating?
+        int count = cfg.getInt("num_particles");
+        Particle[] particles = new Particle[count];
+
+        // Display the particle info as a table
+        // Start with the formatting and header
+        String left_align_format = "| %-2d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
+
+        screen.format("+----+------+------------------+----------------+------------+--------+%n");
+        screen.format("| ID | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+        screen.format("+----+------+------------------+----------------+------------+--------+%n");
+
+        double[][] properties = new double[count][];
+        for (int i = 0; i < count; i++) {
+            // We'll remember the original muon details for safe-keeping
+            Particle particle = sim.makeParticle();
+            particles[i] = new Particle(particle);
+            properties[i] = new double[5];
+
+            // Send particle through the layers and report any errors
+            boolean stopped = !sim.simulate(particle);
+
+            // Use the --last two-- detectors as the track trigger.
+            double est;
+            if (particle.getMomentum() > 0 && stopped == false)
+                est = sim.estimateMomentum(particle);
+            else
+                est = 0;
+
+            properties[i][0] = i+1;
+            properties[i][1] = particle.getMass();
+            properties[i][2] = particles[i].getMomentum();
+            properties[i][3] = particle.getMomentum();
+            properties[i][4] = est;
+
+            screen.format(
+                left_align_format,
+                i+1,
+                properties[i][1],
+                properties[i][2],
+                properties[i][3],
+                est,
+                (est * 100 / particle.getMomentum())
+            );
+        }
+
+        screen.format("+----+------+------------------+----------------+------------+--------+%n");
+
+        write_to_disk("data.csv", properties);
+        sim.exportViewerData();
+    }
+
+    // ---------- Handlers ----------
+
+    public boolean simulate() {
+        Particle particle = factory.newParticle();
+        return simulate(particle);
+    }
+
+    public boolean simulate(Particle p) {
+        return p.handle(layers);
+    }
+
+    public Particle makeParticle() { return factory.newParticle(); }
+    public Particle makeParticle(double mass) {
+        return factory.newParticle(mass);
+    }
+
+    public double estimateMomentum(Particle p) {
+        return estimateMomentum(p, config.getDouble("cd_resolution"));
+    }
+
+    public double estimateMomentum(Particle p, double res) {
+        // Get Coincidence Deteector properties
+        double mag_field = config.getDouble("mag_field");
+        double radius_a  = config.getDouble("cd_radius_a");
+        double radius_b  = config.getDouble("cd_radius_b");
+        double thickness = config.getDouble("cd_thickness");
+        double range     = radius_b - (radius_a + thickness);
+
+        // Get angles at the two coincidence detectors
+        // --- For reference: see final page of project handout
+        //                    these are the angles phi_9A and phi_9B
+        // The results slightly smeared using Helpers.gauss
+        // --- This kind of simulates the resolution of the detectors?
+        double angle_a = Helpers.gauss(p.getTrace().get(radius_a + thickness), res);
+        double angle_b = Helpers.gauss(p.getTrace().get(radius_b), res);
+
+        // Estimate particle momentum (*1000 to convert GeV -> MeV)
+        double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
+        double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
+
+        return momentum_est;
+    }
+
+    // ---------- Helpers ----------
+
+    public Config getConfig() { return config; }
+
+    // ---------- Layer Management ----------
+
+    private void generateLayers() {
         // Radii and thickness of layers
         double[] sdr = { 4.5, 8, 12, 18, 30, 40, 50, 70 };
         double sdt = 0.05; // cm
@@ -80,82 +183,10 @@ public class Simulation {
         detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
 
         // Add additional vacuum layers and sort into correct order
-        setup_layers();
-
-        // Display the particle info as a table
-        // Start with the formatting and header
-        String left_align_format = "| %-2d | %-16.2f | %-14.2f | %-10.2f | %-3.1f%%  |%n";
-
-        screen.format("+----+------------------+----------------+------------+--------+%n");
-        screen.printf("| ID | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
-        screen.format("+----+------------------+----------------+------------+--------+%n");
-
-        double[][] toSave = new double[count][];
-        for (int i = 0; i < count; i++) {
-            // We'll remember the original muon details for safe-keeping
-            Particle particle = factory.newParticle();
-            particles[i] = new Particle(particle);
-            toSave[i] = new double[4];
-
-            // Send particle through the layers and report any errors
-            boolean stopped = false;
-            if (!particle.handle(layers))
-                stopped = true;
-
-            // Use the --last two-- detectors as the track trigger.
-            double est;
-            if (particle.getMomentum() > 0 && stopped == false)
-                est = estimate_momentum(particle, config.getDouble("cd_resolution"));
-            else
-                est = 0;
-
-            toSave[i][0] = i+1;
-            toSave[i][1] = particles[i].getMomentum();
-            toSave[i][2] = particle.getMomentum();
-            toSave[i][3] = est;
-
-            screen.format(
-                left_align_format,
-                i+1,
-                particles[i].getMomentum(),
-                particle.getMomentum(),
-                est,
-                (est * 100 / particle.getMomentum())
-            );
-        }
-
-        screen.format("+----+------------------+----------------+------------+--------+%n");
-
-        write_to_disk("data.csv", toSave);
-        exportViewerData();
+        fillLayerGaps();
     }
 
-    // ---------- Handlers ----------
-
-    public static double estimate_momentum(Particle particle, double res) {
-        // Get Coincidence Deteector properties
-        double mag_field = config.getDouble("mag_field");
-        double radius_a  = config.getDouble("cd_radius_a");
-        double radius_b  = config.getDouble("cd_radius_b");
-        double thickness = config.getDouble("cd_thickness");
-        double range     = radius_b - (radius_a + thickness);
-
-        // Get angles at the two coincidence detectors
-        // --- For reference: see final page of project handout
-        //                    these are the angles phi_9A and phi_9B
-        // The results slightly smeared using Helpers.gauss
-        // --- This kind of simulates the resolution of the detectors?
-        double angle_a = Helpers.gauss(particle.getTrace().get(radius_a + thickness), res);
-        double angle_b = Helpers.gauss(particle.getTrace().get(radius_b), res);
-
-        // Estimate particle momentum (*1000 to convert GeV -> MeV)
-        double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
-        double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
-
-        return momentum_est;
-    }
-
-    private static void setup_layers() {
+    private void fillLayerGaps() {
         // Add detector layers
         layers.addAll(detector_layers);
         order_layers();
@@ -182,7 +213,7 @@ public class Simulation {
         order_layers();
     }
 
-    private static void order_layers() {
+    private void order_layers() {
         // Sort layers in order of ascending radius
         layers.sort(new Comparator<Layer>() {
             @Override
@@ -192,7 +223,9 @@ public class Simulation {
         });
     }
 
-    private static void exportViewerData() throws IOException {
+    // ---------- Exporting Data ----------
+
+    private void exportViewerData() throws IOException {
         double[][] layers = new double[detector_layers.size()][];
         for (int i = 0; i < layers.length; i++) {
             layers[i] = new double[detector_layers.get(i).getHits().size()];
@@ -225,8 +258,8 @@ public class Simulation {
         } finally {
             if (toFile != null)
                 toFile.close();
-
-            return true;
         }
+
+        return true;
     }
 }

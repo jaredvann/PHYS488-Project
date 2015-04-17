@@ -21,21 +21,23 @@ public class AttenuatorLayer extends Layer {
         double direction = particle.getDirection();
         double azimuth = particle.getAzimuth();
 
-        double theta;
+        double energyLoss = attn.getEnergyLoss(mass, momentum);
+
+        double theta = attn.getTheta(mass, momentum);
+        double thetaSmeared;
+
         double distance;
 
         for (int i = 0; i < STEPS; i++) {
-            theta = Helpers.gauss(0, attn.getTheta(mass, momentum));
-            distance = stepSize / Math.cos(theta); // Hypotenuse
+            thetaSmeared = Helpers.gauss(0, theta);
+            distance = stepSize / Math.cos(thetaSmeared); // Hypotenuse
 
-            momentum -= attn.getEnergyLoss(mass, momentum) * Math.abs(distance);
-            direction += theta;
-            azimuth += stepSize * Math.tan(theta);
+            momentum -= energyLoss * Math.abs(distance);
+            direction += thetaSmeared;
+            azimuth += stepSize * Math.tan(thetaSmeared);
 
-            if (momentum <= 0) {
-                momentum = 0;
+            if (momentum <= 0)
                 return false;
-            }
         }
 
         particle.setMomentum(momentum);

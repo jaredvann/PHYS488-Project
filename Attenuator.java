@@ -12,6 +12,10 @@ class Attenuator {
         massNumber = _massNumber;
         density = _density;
 
+        init(stepSize);
+    }
+
+    private void init(double stepSize) {
         // Precalculate most of mcsTheta equation to save repetitive calculations.
         // Approximates step size as constant.
         // May introduce slight errors at far edge of material.
@@ -27,6 +31,15 @@ class Attenuator {
         two_me_over_iM = 2 * Helpers.MASS_ELECTRON / (0.0000135 * atomicNumber);
     }
 
+    private double x0() {
+        double numer = 716.4 * massNumber; // Numerator
+        double denom =
+            atomicNumber * (atomicNumber+1) *
+            Math.log(287 / Math.sqrt(atomicNumber)); // Denominator
+
+        return (numer / denom); // Fraction
+    }
+
     public double getEnergyLoss(double mass, double momentum) {
         double m_e = Helpers.MASS_ELECTRON;
 
@@ -34,15 +47,6 @@ class Attenuator {
         double g2 = 1/(1 - b2); // Gamma(p)^2
 
         return eLossPreCalc * (1/b2) * (Math.log(two_me_over_iM * b2 * g2) - b2); //MeV
-    }
-
-    public double x0() {
-        double numer = 716.4 * massNumber; // Numerator
-        double denom =
-            atomicNumber * (atomicNumber+1) *
-            Math.log(287 / Math.sqrt(atomicNumber)); // Denominator
-
-        return (numer / denom); // Fraction
     }
 
     public double getTheta(double mass, double momentum) {

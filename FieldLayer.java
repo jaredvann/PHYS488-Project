@@ -11,7 +11,6 @@ class FieldLayer extends Layer {
         super(_name, _start, _end);
 
         field = _field;
-
         stepSize = (end - start) / STEPS;
     }
 
