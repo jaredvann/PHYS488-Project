@@ -49,11 +49,11 @@ public class Simulation {
 
         // Display the particle info as a table
         // Start with the formatting and header
-        String left_align_format = "| %-2d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
+        String left_align_format = "| %-5d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
 
-        screen.format("+----+------+------------------+----------------+------------+--------+%n");
-        screen.format("| ID | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
-        screen.format("+----+------+------------------+----------------+------------+--------+%n");
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
 
         double[][] properties = new double[count][];
         for (int i = 0; i < count; i++) {
@@ -89,7 +89,7 @@ public class Simulation {
             );
         }
 
-        screen.format("+----+------+------------------+----------------+------------+--------+%n");
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
 
         write_to_disk("data.csv", properties);
         sim.exportViewerData();
