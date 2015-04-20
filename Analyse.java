@@ -11,6 +11,12 @@ class Analyse {
     private static Config config;
 
     public static void main(String[] args) throws IOException {
+        Simulation.main(null);
+
+        analyse();
+    }
+
+    public static void analyse() throws IOException {
         config = new Config("config.properties");
 
         ArrayList<double[]> data = readCsv("./data.csv");
