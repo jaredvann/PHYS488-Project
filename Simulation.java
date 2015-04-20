@@ -1,9 +1,8 @@
 // Import statements
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.text.DecimalFormat;
@@ -14,7 +13,7 @@ import java.text.DecimalFormat;
 public class Simulation {
     private Config config;
 
-    public ParticleFactory factory;
+    private Random random;
 
     public List<DetectorLayer> detector_layers;
     public List<Layer> layers;
@@ -23,13 +22,7 @@ public class Simulation {
         // Setup Config & PrintWriter instances
         config = new Config("config.properties");
 
-        // Only generate muons so only muon mass needed
-        double[] masses = config.getDoubles("masses"); // MeV/c^2
-        factory = new ParticleFactory(
-            config.getDouble("momentum"),
-            config.getDouble("momentum_smear"),
-            masses
-        );
+        random = new Random();
 
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
@@ -51,9 +44,13 @@ public class Simulation {
         // Start with the formatting and header
         String left_align_format = "| %-5d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
 
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
-        screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        screen.println("Simulation started.");
+
+        if (count < 100) {
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+            screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        }
 
         double[][] properties = new double[count][];
         for (int i = 0; i < count; i++) {
@@ -63,7 +60,7 @@ public class Simulation {
             properties[i] = new double[5];
 
             // Send particle through the layers and report any errors
-            boolean stopped = !sim.simulate(particle);
+            boolean stopped = !particle.handle(sim.layers);
 
             // Use the --last two-- detectors as the track trigger.
             double est;
@@ -78,37 +75,46 @@ public class Simulation {
             properties[i][3] = particle.getMomentum();
             properties[i][4] = est;
 
-            screen.format(
-                left_align_format,
-                i+1,
-                properties[i][1],
-                properties[i][2],
-                properties[i][3],
-                est,
-                (est * 100 / particle.getMomentum())
-            );
+            if (count < 100) {
+                screen.format(
+                    left_align_format,
+                    i+1,
+                    properties[i][1],
+                    properties[i][2],
+                    properties[i][3],
+                    est,
+                    (est * 100 / particle.getMomentum())
+                );
+            }
+
         }
 
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        if (count < 100) {
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        }
 
-        write_to_disk("data.csv", properties);
+        screen.println("Simulation completed.");
+
+        Helpers.write_to_disk("data.csv", properties);
         sim.exportViewerData();
     }
 
     // ---------- Handlers ----------
 
-    public boolean simulate() {
-        Particle particle = factory.newParticle();
-        return simulate(particle);
-    }
-
-    public boolean simulate(Particle p) {
-        return p.handle(layers);
-    }
-
-    public Particle makeParticle() { return factory.newParticle(); }
-    public Particle makeParticle(double mass) {
-        return factory.newParticle(mass);
+    public Particle makeParticle() {
+        return new Particle(
+            // Mass
+            config.getDouble("mass"),
+            // Momentum Smear
+            Math.abs(Helpers.gauss(
+                config.getDouble("momentum"),
+                config.getDouble("momentum") * config.getDouble("momentum_smear")
+            )),
+            // Direction
+            random.nextDouble()*(2*Math.PI),
+            // Azimuth
+            0
+        );
     }
 
     public double estimateMomentum(Particle p) {
@@ -128,14 +134,25 @@ public class Simulation {
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a = Helpers.gauss(p.getTrace().get(radius_a + thickness), res);
-        double angle_b = Helpers.gauss(p.getTrace().get(radius_b), res);
+        double angle_a = Helpers.gauss(p.getTraceAt(radius_a + thickness), res);
+        double angle_b = Helpers.gauss(p.getTraceAt(radius_b), res);
+
+        // double angle_a = get_detector_angle(p.getTraceAt(radius_a + thickness));
+        // double angle_b = get_detector_angle(p.getTraceAt(radius_b));
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
         double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
 
         return momentum_est;
+    }
+
+    public double get_detector_angle(double angle) {
+        angle *= 100000;
+        angle = Math.round(angle);
+        angle /= 100000;
+
+        return angle;
     }
 
     // ---------- Helpers ----------
@@ -179,13 +196,31 @@ public class Simulation {
         double radius_a  = config.getDouble("cd_radius_a");
         double radius_b  = config.getDouble("cd_radius_b");
         double thickness = config.getDouble("cd_thickness");
-        detector_layers.add(new DetectorLayer("CoincidenceDetector_1", radius_a, (radius_a+thickness), silicon_attn));
-        detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
+
+        detector_layers.add(
+            new DetectorLayer(
+                "CoincidenceDetector_1",
+                radius_a,
+                (radius_a+thickness),
+                silicon_attn
+            )
+        );
+
+        detector_layers.add(
+            new DetectorLayer(
+                "CoincidenceDetector_2",
+                radius_b,
+                (radius_b+thickness),
+                silicon_attn
+            )
+        );
 
         // Add additional vacuum layers and sort into correct order
         fillLayerGaps();
     }
 
+    // Fills the gaps between physical layers with a FieldLayer, to represent
+    // the particle travelling through a magnetic field (in a vacuum).
     private void fillLayerGaps() {
         // Add detector layers
         layers.addAll(detector_layers);
@@ -213,8 +248,8 @@ public class Simulation {
         order_layers();
     }
 
+    // Sort layers in order of ascending radius
     private void order_layers() {
-        // Sort layers in order of ascending radius
         layers.sort(new Comparator<Layer>() {
             @Override
             public int compare(Layer l1, Layer l2) {
@@ -235,31 +270,6 @@ public class Simulation {
             }
         }
 
-        write_to_disk("layers.csv", layers);
-    }
-
-    private static boolean write_to_disk(String filepath, double[][] data) throws IOException {
-        FileWriter file;
-        PrintWriter toFile = null;
-
-        try {
-            file = new FileWriter(filepath); // File stream
-            toFile = new PrintWriter(file); // File writer
-
-            for (double[] line : data) {
-                for (double item : line)
-                    toFile.print(item + ",");
-
-                if (line.length > 0) toFile.println();
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-            return false;
-        } finally {
-            if (toFile != null)
-                toFile.close();
-        }
-
-        return true;
+        Helpers.write_to_disk("layers.csv", layers);
     }
 }

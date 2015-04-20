@@ -8,18 +8,16 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.FileNotFoundException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.FileReader;
 
 public class DetectorViewer extends Application {
-
     private static Config config;
 
+    // Window size
     private int width = 800;
     private int height = 800;
 
+    // Radius of detector
     private double radius = 1000;
     private double scale_factor;
 
@@ -28,7 +26,6 @@ public class DetectorViewer extends Application {
     private static ArrayList<Layer> layers = new ArrayList<Layer>();
     private static ArrayList<DetectorLayer> detector_layers = new ArrayList<DetectorLayer>();
 
-
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
@@ -36,6 +33,7 @@ public class DetectorViewer extends Application {
         double[] silicon = {45, 80, 120, 180, 300, 400, 500, 700};
         double[] coincidence = {900, 910};
 
+        // Create all layers
         for (double r : beryllium)
             layers.add(new Layer("", r, r+6));
 
@@ -51,67 +49,45 @@ public class DetectorViewer extends Application {
         for (double r : coincidence)
             detector_layers.add(new DetectorLayer("CoincidenceDetector", r));
 
-        importCSVData("layers.csv");
+        // Load hits data
+        ArrayList<double[]> data = Helpers.read_CSV("layers.csv");
+
+        // Add data to relevant detectors
+        for (int i = 0; i < detector_layers.size(); i++) {
+            for (int j = 0; j < data.get(i).length; j++) {
+                detector_layers.get(i).addHit(data.get(i)[j]);
+            }
+        }
 
         launch(args);
     }
-
 
     public DetectorViewer() {
         scale_factor = 0.5*width/radius;
     }
 
-
-    private static void importCSVData(String file_path) throws IOException {
-        String[] s_values;
-        BufferedReader br = null;
-        String line = "";
-
-        try {
-            br = new BufferedReader(new FileReader(file_path));
-
-            for (DetectorLayer detector : detector_layers) {
-                if ((line = br.readLine()) != null) {
-                    s_values = line.split(",");
-
-                    for (int j = 0; j < s_values.length; j++)
-                        detector.addHit(Double.parseDouble(s_values[j]));
-                }
-            }
-        }
-        catch (FileNotFoundException e) { e.printStackTrace(); }
-        catch (IOException e) { e.printStackTrace(); }
-        finally {
-            if (br != null) {
-                try { br.close(); }
-                catch (IOException e) { e.printStackTrace(); }
-            }
-        }
-
-    }
-
-
     @Override
     public void start(Stage stage) {
+        // Sort layers into correct order, will not draw correctly otherwise
         sortLayers();
 
+        // Setup JavaFX canvas
         Group root = new Group();
         Canvas canvas = new Canvas(width, height);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
+        // Everything is drawn here
         drawDetector(gc);
         drawPoints(gc);
 
+        // Setup window and show
         stage.setTitle("DetectorViewer");
         root.getChildren().add(canvas);
         stage.setScene(new Scene(root));
         stage.show();
     }
 
-
     private void sortLayers() {
-        // layers.addAll(detector_layers);
-
         layers.sort(new Comparator<Layer>() {
             @Override
             public int compare(Layer l1, Layer l2) {
@@ -120,7 +96,6 @@ public class DetectorViewer extends Application {
             }
         });
     }
-
 
     private void drawDetector(GraphicsContext gc) {
         double r;
@@ -135,7 +110,6 @@ public class DetectorViewer extends Application {
             gc.fillOval(width/2-r, height/2-r, r*2, r*2);
         }
     }
-
 
     private void drawPoints(GraphicsContext gc) {
         double r; double r2 = 4;
