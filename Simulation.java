@@ -91,7 +91,7 @@ public class Simulation {
 
         screen.format("+-------+------+------------------+----------------+------------+--------+%n");
 
-        write_to_disk("data.csv", properties);
+        Helpers.write_to_disk("data.csv", properties);
         sim.exportViewerData();
     }
 
@@ -235,31 +235,6 @@ public class Simulation {
             }
         }
 
-        write_to_disk("layers.csv", layers);
-    }
-
-    private static boolean write_to_disk(String filepath, double[][] data) throws IOException {
-        FileWriter file;
-        PrintWriter toFile = null;
-
-        try {
-            file = new FileWriter(filepath); // File stream
-            toFile = new PrintWriter(file); // File writer
-
-            for (double[] line : data) {
-                for (double item : line)
-                    toFile.print(item + ",");
-
-                if (line.length > 0) toFile.println();
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-            return false;
-        } finally {
-            if (toFile != null)
-                toFile.close();
-        }
-
-        return true;
+        Helpers.write_to_disk("layers.csv", layers);
     }
 }

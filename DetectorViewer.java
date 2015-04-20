@@ -8,10 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.FileNotFoundException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.FileReader;
 
 public class DetectorViewer extends Application {
 
@@ -63,31 +60,13 @@ public class DetectorViewer extends Application {
 
 
     private static void importCSVData(String file_path) throws IOException {
-        String[] s_values;
-        BufferedReader br = null;
-        String line = "";
+        ArrayList<double[]> data = Helpers.read_CSV(file_path);
 
-        try {
-            br = new BufferedReader(new FileReader(file_path));
-
-            for (DetectorLayer detector : detector_layers) {
-                if ((line = br.readLine()) != null) {
-                    s_values = line.split(",");
-
-                    for (int j = 0; j < s_values.length; j++)
-                        detector.addHit(Double.parseDouble(s_values[j]));
-                }
+        for (int i = 0; i < detector_layers.size(); i++) {
+            for (int j = 0; j < data.get(i).length; j++) {
+                detector_layers.get(i).addHit(data.get(i)[j]);
             }
         }
-        catch (FileNotFoundException e) { e.printStackTrace(); }
-        catch (IOException e) { e.printStackTrace(); }
-        finally {
-            if (br != null) {
-                try { br.close(); }
-                catch (IOException e) { e.printStackTrace(); }
-            }
-        }
-
     }
 
 
