@@ -17,6 +17,10 @@ public class Config {
         }
     }
 
+    public boolean hasKey(String key) {
+        return config.stringPropertyNames().contains(key);
+    }
+
     public String get(String key) {
         return config.getProperty(key);
     }

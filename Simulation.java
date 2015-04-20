@@ -11,18 +11,31 @@ import java.text.DecimalFormat;
  * Let's get our simulation on!
  */
 public class Simulation {
+    private Random random;
     private Config config;
 
-    private Random random;
+    public double[] masses;
+
+    public double magField;
+
+    public double momentum;
+    public double momentumSmear;
+    public double momentumLimit;
+
+    public double triggerRadiusA;
+    public double triggerRadiusB;
+    public double triggerThickness;
+    public double triggerResolution;
 
     public List<DetectorLayer> detector_layers;
     public List<Layer> layers;
 
-    public Simulation() throws IOException {
-        // Setup Config & PrintWriter instances
-        config = new Config("config.properties");
-
+    public Simulation(Config cfg) throws IOException {
         random = new Random();
+
+        // Setup configuration
+        config = cfg;
+        reset();
 
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
@@ -30,11 +43,35 @@ public class Simulation {
         generateLayers();
     }
 
+    public void reset() {
+        masses = (config.hasKey("masses")) ?
+            config.getDoubles("masses") : new double[106];
+
+        magField = (config.hasKey("mag_field")) ?
+            config.getDouble("mag_field") : 4;
+
+        momentum = (config.hasKey("momentum")) ?
+            config.getDouble("momentum") : 50000;
+        momentumSmear = (config.hasKey("momentum_smear")) ?
+            config.getDouble("momentum_smear") : 0.5;
+        momentumLimit = (config.hasKey("momentum_limit")) ?
+            config.getDouble("momentum_limit") : 50000;
+
+        triggerRadiusA = (config.hasKey("cd_radius_a")) ?
+            config.getDouble("cd_radius_a") : 90;
+        triggerRadiusB = (config.hasKey("cd_radius_b")) ?
+            config.getDouble("cd_radius_b") : 91;
+        triggerThickness = (config.hasKey("cd_thickness")) ?
+            config.getDouble("cd_thickness") : 0.05;
+        triggerThickness = (config.hasKey("cd_resolution")) ?
+            config.getDouble("cd_resolution") : 0.00005;
+    }
+
     public static void main(String[] args) throws IOException {
         PrintWriter screen = new PrintWriter(System.out, true);
 
-        Simulation sim = new Simulation();
-        Config cfg = sim.getConfig();
+        Config cfg = new Config("config.properties");
+        Simulation sim = new Simulation(cfg);
 
         // How many particles are we simulating?
         int count = cfg.getInt("num_particles");
@@ -104,11 +141,11 @@ public class Simulation {
     public Particle makeParticle() {
         return new Particle(
             // Mass
-            config.getDouble("mass"),
+            masses[random.nextInt(masses.length)],
             // Momentum Smear
             Math.abs(Helpers.gauss(
-                config.getDouble("momentum"),
-                config.getDouble("momentum") * config.getDouble("momentum_smear")
+                momentum,
+                momentum * momentumSmear
             )),
             // Direction
             random.nextDouble()*(2*Math.PI),
@@ -118,31 +155,28 @@ public class Simulation {
     }
 
     public double estimateMomentum(Particle p) {
-        return estimateMomentum(p, config.getDouble("cd_resolution"));
+        return estimateMomentum(p, triggerResolution);
     }
 
     public double estimateMomentum(Particle p, double res) {
         // Get Coincidence Deteector properties
-        double mag_field = config.getDouble("mag_field");
-        double radius_a  = config.getDouble("cd_radius_a");
-        double radius_b  = config.getDouble("cd_radius_b");
-        double thickness = config.getDouble("cd_thickness");
-        double range     = radius_b - (radius_a + thickness);
+        double range = triggerRadiusB - (triggerRadiusA + triggerThickness);
 
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a = Helpers.gauss(p.getTraceAt(radius_a + thickness), res);
-        double angle_b = Helpers.gauss(p.getTraceAt(radius_b), res);
-
-        // double angle_a = get_detector_angle(p.getTraceAt(radius_a + thickness));
-        // double angle_b = get_detector_angle(p.getTraceAt(radius_b));
+        double angle_a =
+            Helpers.gauss(p.getTraceAt(triggerRadiusA + triggerThickness), res);
+        double angle_b =
+            Helpers.gauss(p.getTraceAt(triggerRadiusB), res);
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
-        double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
-        double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
+        double delta =
+            Math.abs(Math.atan(triggerRadiusB*(angle_b - angle_a)/range));
+        double momentum_est =
+            1000 * 0.3 * magField * triggerRadiusB / (2*delta);
 
         return momentum_est;
     }
@@ -193,15 +227,11 @@ public class Simulation {
         }
 
         // Add coincidence detectors
-        double radius_a  = config.getDouble("cd_radius_a");
-        double radius_b  = config.getDouble("cd_radius_b");
-        double thickness = config.getDouble("cd_thickness");
-
         detector_layers.add(
             new DetectorLayer(
                 "CoincidenceDetector_1",
-                radius_a,
-                (radius_a+thickness),
+                triggerRadiusA,
+                (triggerRadiusA + triggerThickness),
                 silicon_attn
             )
         );
@@ -209,8 +239,8 @@ public class Simulation {
         detector_layers.add(
             new DetectorLayer(
                 "CoincidenceDetector_2",
-                radius_b,
-                (radius_b+thickness),
+                triggerRadiusB,
+                (triggerRadiusB + triggerThickness),
                 silicon_attn
             )
         );
