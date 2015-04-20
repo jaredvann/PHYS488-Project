@@ -12,59 +12,21 @@ import java.text.DecimalFormat;
  */
 public class Simulation {
     private Random random;
-    private Config config;
-
-    public double[] masses;
-
-    public double magField;
-
-    public double momentum;
-    public double momentumSmear;
-    public double momentumLimit;
-
-    public double triggerRadiusA;
-    public double triggerRadiusB;
-    public double triggerThickness;
-    public double triggerResolution;
+    private Config cfg;
 
     public List<DetectorLayer> detector_layers;
     public List<Layer> layers;
 
-    public Simulation(Config cfg) throws IOException {
+    public Simulation(Config _cfg) throws IOException {
         random = new Random();
 
         // Setup configuration
-        config = cfg;
-        reset();
+        cfg = _cfg;
 
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
         layers          = new ArrayList<Layer>();
         generateLayers();
-    }
-
-    public void reset() {
-        masses = (config.hasKey("masses")) ?
-            config.getDoubles("masses") : new double[106];
-
-        magField = (config.hasKey("mag_field")) ?
-            config.getDouble("mag_field") : 4;
-
-        momentum = (config.hasKey("momentum")) ?
-            config.getDouble("momentum") : 50000;
-        momentumSmear = (config.hasKey("momentum_smear")) ?
-            config.getDouble("momentum_smear") : 0.5;
-        momentumLimit = (config.hasKey("momentum_limit")) ?
-            config.getDouble("momentum_limit") : 50000;
-
-        triggerRadiusA = (config.hasKey("cd_radius_a")) ?
-            config.getDouble("cd_radius_a") : 90;
-        triggerRadiusB = (config.hasKey("cd_radius_b")) ?
-            config.getDouble("cd_radius_b") : 91;
-        triggerThickness = (config.hasKey("cd_thickness")) ?
-            config.getDouble("cd_thickness") : 0.05;
-        triggerThickness = (config.hasKey("cd_resolution")) ?
-            config.getDouble("cd_resolution") : 0.00005;
     }
 
     public static void main(String[] args) throws IOException {
@@ -73,62 +35,9 @@ public class Simulation {
         Config cfg = new Config("config.properties");
         Simulation sim = new Simulation(cfg);
 
-        // How many particles are we simulating?
-        int count = cfg.getInt("num_particles");
-        Particle[] particles = new Particle[count];
-
-        // Display the particle info as a table
-        // Start with the formatting and header
-        String left_align_format = "| %-5d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
-
         screen.println("Simulation started.");
 
-        if (count < 100) {
-            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
-            screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
-            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
-        }
-
-        double[][] properties = new double[count][];
-        for (int i = 0; i < count; i++) {
-            // We'll remember the original muon details for safe-keeping
-            Particle particle = sim.makeParticle();
-            particles[i] = new Particle(particle);
-            properties[i] = new double[5];
-
-            // Send particle through the layers and report any errors
-            boolean stopped = !particle.handle(sim.layers);
-
-            // Use the --last two-- detectors as the track trigger.
-            double est;
-            if (particle.getMomentum() > 0 && stopped == false)
-                est = sim.estimateMomentum(particle);
-            else
-                est = 0;
-
-            properties[i][0] = i+1;
-            properties[i][1] = particle.getMass();
-            properties[i][2] = particles[i].getMomentum();
-            properties[i][3] = particle.getMomentum();
-            properties[i][4] = est;
-
-            if (count < 100) {
-                screen.format(
-                    left_align_format,
-                    i+1,
-                    properties[i][1],
-                    properties[i][2],
-                    properties[i][3],
-                    est,
-                    (est * 100 / particle.getMomentum())
-                );
-            }
-
-        }
-
-        if (count < 100) {
-            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
-        }
+        double[][] properties = sim.simulate();
 
         screen.println("Simulation completed.");
 
@@ -141,11 +50,11 @@ public class Simulation {
     public Particle makeParticle() {
         return new Particle(
             // Mass
-            masses[random.nextInt(masses.length)],
+            cfg.masses[random.nextInt(cfg.masses.length)],
             // Momentum Smear
             Math.abs(Helpers.gauss(
-                momentum,
-                momentum * momentumSmear
+                cfg.momentum,
+                cfg.momentum * cfg.momentumSmear
             )),
             // Direction
             random.nextDouble()*(2*Math.PI),
@@ -154,29 +63,55 @@ public class Simulation {
         );
     }
 
-    public double estimateMomentum(Particle p) {
-        return estimateMomentum(p, triggerResolution);
+    public double[][] simulate() {
+        Particle[] particles = new Particle[cfg.numParticles];
+        double[][] properties = new double[cfg.numParticles][];
+
+        for (int i = 0; i < cfg.numParticles; i++) {
+            // We'll remember the original muon details for safe-keeping
+            Particle particle = makeParticle();
+            particles[i] = new Particle(particle);
+            properties[i] = new double[5];
+
+            // Send particle through the layers and report any errors
+            boolean stopped = !particle.handle(layers);
+
+            // Use the --last two-- detectors as the track trigger.
+            double est;
+            if (particle.getMomentum() > 0 && stopped == false)
+                est = estimateMomentum(particle);
+            else
+                est = 0;
+
+            properties[i][0] = i+1;
+            properties[i][1] = particle.getMass();
+            properties[i][2] = particles[i].getMomentum();
+            properties[i][3] = particle.getMomentum();
+            properties[i][4] = est;
+        }
+
+        return properties;
     }
 
-    public double estimateMomentum(Particle p, double res) {
+    public double estimateMomentum(Particle p) {
         // Get Coincidence Deteector properties
-        double range = triggerRadiusB - (triggerRadiusA + triggerThickness);
+        double range =
+            cfg.triggerRadiusB - (cfg.triggerRadiusA + cfg.triggerThickness);
 
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a =
-            Helpers.gauss(p.getTraceAt(triggerRadiusA + triggerThickness), res);
+        double angle_a = Helpers.gauss(p.getTraceAt(cfg.triggerRadiusA + cfg.triggerThickness), cfg.triggerResolution);
         double angle_b =
-            Helpers.gauss(p.getTraceAt(triggerRadiusB), res);
+            Helpers.gauss(p.getTraceAt(cfg.triggerRadiusB), cfg.triggerResolution);
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta =
-            Math.abs(Math.atan(triggerRadiusB*(angle_b - angle_a)/range));
+            Math.abs(Math.atan(cfg.triggerRadiusB*(angle_b - angle_a)/range));
         double momentum_est =
-            1000 * 0.3 * magField * triggerRadiusB / (2*delta);
+            1000 * 0.3 * cfg.magField * cfg.triggerRadiusB / (2*delta);
 
         return momentum_est;
     }
@@ -188,10 +123,6 @@ public class Simulation {
 
         return angle;
     }
-
-    // ---------- Helpers ----------
-
-    public Config getConfig() { return config; }
 
     // ---------- Layer Management ----------
 
@@ -230,8 +161,8 @@ public class Simulation {
         detector_layers.add(
             new DetectorLayer(
                 "CoincidenceDetector_1",
-                triggerRadiusA,
-                (triggerRadiusA + triggerThickness),
+                cfg.triggerRadiusA,
+                (cfg.triggerRadiusA + cfg.triggerThickness),
                 silicon_attn
             )
         );
@@ -239,8 +170,8 @@ public class Simulation {
         detector_layers.add(
             new DetectorLayer(
                 "CoincidenceDetector_2",
-                triggerRadiusB,
-                (triggerRadiusB + triggerThickness),
+                cfg.triggerRadiusB,
+                (cfg.triggerRadiusB + cfg.triggerThickness),
                 silicon_attn
             )
         );
@@ -266,7 +197,7 @@ public class Simulation {
                     "V-"+String.valueOf(last),
                     last,
                     l.getStart(),
-                    config.getDouble("mag_field")
+                    cfg.magField
                 )
             );
 
