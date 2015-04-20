@@ -76,15 +76,15 @@ public class Simulation {
             properties[i][3] = particle.getMomentum();
             properties[i][4] = est;
 
-            screen.format(
-                left_align_format,
-                i+1,
-                properties[i][1],
-                properties[i][2],
-                properties[i][3],
-                est,
-                (est * 100 / particle.getMomentum())
-            );
+            // screen.format(
+            //     left_align_format,
+            //     i+1,
+            //     properties[i][1],
+            //     properties[i][2],
+            //     properties[i][3],
+            //     est,
+            //     (est * 100 / particle.getMomentum())
+            // );
         }
 
         screen.format("+-------+------+------------------+----------------+------------+--------+%n");

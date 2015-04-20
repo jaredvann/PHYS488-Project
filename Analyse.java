@@ -12,7 +12,7 @@ class Analyse {
 
         int count = 0;
         int estCount = 0;
-        double mom = config.getDouble("momentum");
+        double mom = config.getDouble("high_momentum_limit");
 
         for (double[] row : data) {
             if (row[2] >= mom)
