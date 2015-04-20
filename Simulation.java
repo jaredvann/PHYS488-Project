@@ -2,6 +2,7 @@
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.text.DecimalFormat;
@@ -12,7 +13,7 @@ import java.text.DecimalFormat;
 public class Simulation {
     private Config config;
 
-    public ParticleFactory factory;
+    private Random random;
 
     public List<DetectorLayer> detector_layers;
     public List<Layer> layers;
@@ -21,13 +22,7 @@ public class Simulation {
         // Setup Config & PrintWriter instances
         config = new Config("config.properties");
 
-        // Only generate muons so only muon mass needed
-        double[] masses = config.getDoubles("masses"); // MeV/c^2
-        factory = new ParticleFactory(
-            config.getDouble("momentum"),
-            config.getDouble("momentum_smear"),
-            masses
-        );
+        random = new Random();
 
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
@@ -96,7 +91,7 @@ public class Simulation {
     // ---------- Handlers ----------
 
     public boolean simulate() {
-        Particle particle = factory.newParticle();
+        Particle particle = makeParticle();
         return simulate(particle);
     }
 
@@ -104,9 +99,20 @@ public class Simulation {
         return p.handle(layers);
     }
 
-    public Particle makeParticle() { return factory.newParticle(); }
-    public Particle makeParticle(double mass) {
-        return factory.newParticle(mass);
+    public Particle makeParticle() {
+        return new Particle(
+            // Mass
+            config.getDouble("mass"),
+            // momentum_smear
+            Math.abs(Helpers.gauss(
+                config.getDouble("momentum"),
+                config.getDouble("momentum") * config.getDouble("momentum_smear")
+            )),
+            // Direction
+            random.nextDouble()*(2*Math.PI),
+            // Azimuth
+            0
+        );
     }
 
     public double estimateMomentum(Particle p) {
@@ -129,11 +135,22 @@ public class Simulation {
         double angle_a = Helpers.gauss(p.getTraceAt(radius_a + thickness), res);
         double angle_b = Helpers.gauss(p.getTraceAt(radius_b), res);
 
+        // double angle_a = get_detector_angle(p.getTraceAt(radius_a + thickness));
+        // double angle_b = get_detector_angle(p.getTraceAt(radius_b));
+
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));
         double momentum_est = 1000 * 0.3 * mag_field * radius_b / (2*delta);
 
         return momentum_est;
+    }
+
+    public double get_detector_angle(double angle) {
+        angle *= 100000;
+        angle = Math.round(angle);
+        angle /= 100000;
+
+        return angle;
     }
 
     // ---------- Helpers ----------
