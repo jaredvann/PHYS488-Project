@@ -1,8 +1,6 @@
 // Import statements
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -128,8 +126,8 @@ public class Simulation {
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a = Helpers.gauss(p.getTrace().get(radius_a + thickness), res);
-        double angle_b = Helpers.gauss(p.getTrace().get(radius_b), res);
+        double angle_a = Helpers.gauss(p.getTraceAt(radius_a + thickness), res);
+        double angle_b = Helpers.gauss(p.getTraceAt(radius_b), res);
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta = Math.abs(Math.atan(radius_b*(angle_b - angle_a)/range));

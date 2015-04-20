@@ -77,4 +77,5 @@ public class Particle {
     public void setCharge(double _charge) { charge = _charge; }
 
     public SortedMap<Double, Double> getTrace() { return trace; }
+    public double getTraceAt(double r) { return trace.get(r); }
 }
