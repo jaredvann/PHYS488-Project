@@ -44,9 +44,13 @@ public class Simulation {
         // Start with the formatting and header
         String left_align_format = "| %-5d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
 
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
-        screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        screen.println("Simulation started.");
+
+        if (count < 100) {
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+            screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        }
 
         double[][] properties = new double[count][];
         for (int i = 0; i < count; i++) {
@@ -56,7 +60,7 @@ public class Simulation {
             properties[i] = new double[5];
 
             // Send particle through the layers and report any errors
-            boolean stopped = !sim.simulate(particle);
+            boolean stopped = !particle.handle(sim.layers);
 
             // Use the --last two-- detectors as the track trigger.
             double est;
@@ -71,18 +75,25 @@ public class Simulation {
             properties[i][3] = particle.getMomentum();
             properties[i][4] = est;
 
-            // screen.format(
-            //     left_align_format,
-            //     i+1,
-            //     properties[i][1],
-            //     properties[i][2],
-            //     properties[i][3],
-            //     est,
-            //     (est * 100 / particle.getMomentum())
-            // );
+            if (count < 100) {
+                screen.format(
+                    left_align_format,
+                    i+1,
+                    properties[i][1],
+                    properties[i][2],
+                    properties[i][3],
+                    est,
+                    (est * 100 / particle.getMomentum())
+                );
+            }
+
         }
 
-        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        if (count < 100) {
+            screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        }
+
+        screen.println("Simulation completed.");
 
         Helpers.write_to_disk("data.csv", properties);
         sim.exportViewerData();
@@ -90,20 +101,11 @@ public class Simulation {
 
     // ---------- Handlers ----------
 
-    public boolean simulate() {
-        Particle particle = makeParticle();
-        return simulate(particle);
-    }
-
-    public boolean simulate(Particle p) {
-        return p.handle(layers);
-    }
-
     public Particle makeParticle() {
         return new Particle(
             // Mass
             config.getDouble("mass"),
-            // momentum_smear
+            // Momentum Smear
             Math.abs(Helpers.gauss(
                 config.getDouble("momentum"),
                 config.getDouble("momentum") * config.getDouble("momentum_smear")
@@ -194,13 +196,31 @@ public class Simulation {
         double radius_a  = config.getDouble("cd_radius_a");
         double radius_b  = config.getDouble("cd_radius_b");
         double thickness = config.getDouble("cd_thickness");
-        detector_layers.add(new DetectorLayer("CoincidenceDetector_1", radius_a, (radius_a+thickness), silicon_attn));
-        detector_layers.add(new DetectorLayer("CoincidenceDetector_2", radius_b, (radius_b+thickness), silicon_attn));
+
+        detector_layers.add(
+            new DetectorLayer(
+                "CoincidenceDetector_1",
+                radius_a,
+                (radius_a+thickness),
+                silicon_attn
+            )
+        );
+
+        detector_layers.add(
+            new DetectorLayer(
+                "CoincidenceDetector_2",
+                radius_b,
+                (radius_b+thickness),
+                silicon_attn
+            )
+        );
 
         // Add additional vacuum layers and sort into correct order
         fillLayerGaps();
     }
 
+    // Fills the gaps between physical layers with a FieldLayer, to represent
+    // the particle travelling through a magnetic field (in a vacuum).
     private void fillLayerGaps() {
         // Add detector layers
         layers.addAll(detector_layers);
@@ -228,8 +248,8 @@ public class Simulation {
         order_layers();
     }
 
+    // Sort layers in order of ascending radius
     private void order_layers() {
-        // Sort layers in order of ascending radius
         layers.sort(new Comparator<Layer>() {
             @Override
             public int compare(Layer l1, Layer l2) {
