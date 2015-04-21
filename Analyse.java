@@ -14,8 +14,8 @@ class Analyse {
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
-        stepCount = 5;
-        stepSize  = 0.5;
+        stepCount = 10;
+        stepSize  = 10000;
 
         Helpers.write_to_disk("./analysis.csv", run());
     }
@@ -24,22 +24,23 @@ class Analyse {
         double[][] out = new double[stepCount][];
 
         Simulation sim;
-        double eff = 0;
+
+        System.out.println("[*] 0%");
+
+        int iter = 1;
         for (int i = 0; i < stepCount; i++) {
             sim = new Simulation(config);
 
-            for (int j = 0; j < SAMPLE_SIZE; j++)
-                eff += analyse(sim.simulate());
+            out[i] = new double[(1+SAMPLE_SIZE)];
+            out[i][0] = config.momentum;
 
-            out[i] = new double[3];
-            out[i][0] = i+1;
-            out[i][1] = config.magField;
-            out[i][2] = eff / SAMPLE_SIZE;
+            for (int j = 0; j < SAMPLE_SIZE; j++) {
+                out[i][(1+j)] = analyse(sim.simulate());
+                System.out.println("[*] " + ((iter)*100 / (SAMPLE_SIZE*stepCount)) + "%");
+                iter += 1;
+            }
 
-            eff = 0;
-            config.magField += stepSize;
-
-            System.out.println("[*] " + ((i+1)*100 / stepCount) + "%");
+            config.momentum += stepSize;
         }
 
         return out;
