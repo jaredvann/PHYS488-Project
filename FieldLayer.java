@@ -4,11 +4,10 @@ class FieldLayer extends Layer {
     private double field;
     private double stepSize;
 
-    public FieldLayer(String _name,
-                      double _start,
+    public FieldLayer(double _start,
                       double _end,
                       double _field) {
-        super(_name, _start, _end);
+        super(_start, _end);
 
         field = _field;
         stepSize = (end - start) / STEPS;
@@ -20,13 +19,13 @@ class FieldLayer extends Layer {
         double trajectoryRadius;
 
         // Store particle properties as local variables
-        double pAzimuth   = p.getAzimuth();
-        double pDirection = p.getDirection();
-        double pCharge    = p.getCharge();
+        double pAzimuth   = p.azimuth;
+        double pDirection = p.direction;
+        double pCharge    = p.charge;
 
         // Find the angle the particle momentum is changed by through one step
         // 1000 is to convert into GeV/c
-        double theta = (stepSize * 1000 * 0.3 * field) / p.getMomentum();
+        double theta = (stepSize * 1000 * 0.3 * field) / p.momentum;
 
         // Convert particle azimuthal angle into cartesian coordinates
         pX = start * Math.cos(pAzimuth);

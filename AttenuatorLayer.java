@@ -5,11 +5,10 @@ public class AttenuatorLayer extends Layer {
     private double stepSize;
     private Attenuator attn;
 
-    public AttenuatorLayer(String _name,
-                           double _start,
+    public AttenuatorLayer(double _start,
                            double _end,
                            Attenuator _attn) {
-        super(_name, _start, _end);
+        super(_start, _end);
 
         // Step size proportional to thickness of attenuator to give a good
         // change of particles getting through
@@ -19,10 +18,10 @@ public class AttenuatorLayer extends Layer {
 
     public boolean handle(Particle particle) {
         // Create local variables of particle properties
-        double mass = particle.getMass();
-        double momentum = particle.getMomentum();
-        double direction = particle.getDirection();
-        double azimuth = particle.getAzimuth();
+        double mass = particle.mass;
+        double momentum = particle.momentum;
+        double direction = particle.direction;
+        double azimuth = particle.azimuth;
 
         // Energy loss and theta dependent on momentum which varies as particle
         // is attenuated, however changes in momentum are so small, as an
