@@ -1,6 +1,4 @@
 public class Layer {
-    public String name;
-
     public double start;
     public double end;
 

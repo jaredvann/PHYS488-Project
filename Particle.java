@@ -1,16 +1,15 @@
 import java.util.List;
 import java.util.TreeMap;
-import java.util.SortedMap;
 
 public class Particle {
     public double mass; // MeV
     public double momentum; // MeV
-    public double original_momentum;
+    public double original_momentum; // MeV
     public double direction; // Radians
     public double azimuth; // Radians
-    public double charge; // e (Charge on an electron)
+    public double charge; // e (Elementary charge)
 
-    public SortedMap<Double, Double> trace;
+    public TreeMap<Double, Double> trace;
 
     public Particle(double _mass,
                     double _momentum,
@@ -37,27 +36,20 @@ public class Particle {
         );
     }
 
-    // ---------- Handlers ----------
-
     public boolean handle(List<Layer> layers) {
         // Send the muon through all the layers in the accelerator
         for (Layer layer : layers) {
-            if (momentum <= 0)
+            if (momentum <= 0) {
                 return false;
+            }
 
-            if (layer.handle(this) == false)
+            if (layer.handle(this) == false) {
                 return false;
+            }
         }
 
         return true;
     }
-
-    // ---------- Helpers ----------
-
-    public double getX(double radius) { return radius * Math.cos(azimuth); }
-    public double getY(double radius) { return radius * Math.sin(azimuth); }
-
-    // ---------- Setters ----------
 
     public void setMass(double _mass) { mass = _mass; }
 
@@ -70,8 +62,6 @@ public class Particle {
         azimuth = _azimuth;
         trace.put(_radius, _azimuth);
     }
-
-    public void setCharge(double _charge) { charge = _charge; }
 
     public double getTraceAt(double r) { return trace.get(r); }
 }

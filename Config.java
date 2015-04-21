@@ -7,9 +7,9 @@ import java.io.FileInputStream;
 public class Config {
     private static Properties config = new Properties();
 
-    public Config(String fp) throws IOException {
+    public Config(String filepath) throws IOException {
         try {
-            FileInputStream file = new FileInputStream(new File("./"+fp));
+            FileInputStream file = new FileInputStream(new File("./"+filepath));
             config.load(file);
             file.close();
         } catch (IOException e) {
@@ -17,30 +17,7 @@ public class Config {
         }
     }
 
-    public boolean hasKey(String key) {
-        return config.stringPropertyNames().contains(key);
-    }
-
-    public String get(String key) {
-        return config.getProperty(key);
-    }
-
-    public int getInt(String key) {
-        return Integer.parseInt(get(key));
-    }
-
-    public double getDouble(String key) {
-        return Double.parseDouble(get(key));
-    }
-
-    public double[] getDoubles(String key) {
-        String s = get(key);
-        String[] ls = s.split(",");
-        double[] doubles = new double[ls.length];
-
-        for (int i = 0; i < doubles.length; i++)
-            doubles[i] = Double.parseDouble(ls[i]);
-
-        return doubles;
-    }
+    public String get(String key) { return config.getProperty(key); }
+    public int getInt(String key) { return Integer.parseInt(get(key)); }
+    public double getDouble(String key) { return Double.parseDouble(get(key)); }
 }

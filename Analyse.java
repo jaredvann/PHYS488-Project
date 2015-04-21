@@ -28,16 +28,17 @@ class Analyse {
         String filename = "./data/" + sdf.format(new Date()) + ".csv";
 
         // Add the general parameters of the simulation to the top of the output
-        String header = "num_particles," + simulation.num_particles + "\n" +
-        "particle_mass," + simulation.particle_mass + "\n" +
-        "mag_field," + simulation.mag_field + "\n" +
-        "momentum," + simulation.momentum + "\n" +
-        "momentum_smear," + simulation.momentum_smear + "\n" +
-        "momentum_limit," + simulation.momentum_limit + "\n" +
-        "trigger_radius_A," + simulation.trigger_radius_A + "\n" +
-        "trigger_radius_B," + simulation.trigger_radius_B + "\n" +
-        "trigger_thickness," + simulation.trigger_thickness + "\n" +
-        "trigger_resolution," + simulation.trigger_resolution + "\n";
+        String header =
+            "num_particles," + simulation.num_particles + "\n" +
+            "particle_mass," + simulation.particle_mass + "\n" +
+            "mag_field," + simulation.mag_field + "\n" +
+            "momentum," + simulation.momentum + "\n" +
+            "momentum_smear," + simulation.momentum_smear + "\n" +
+            "momentum_limit," + simulation.momentum_limit + "\n" +
+            "trigger_radius_A," + simulation.trigger_radius_A + "\n" +
+            "trigger_radius_B," + simulation.trigger_radius_B + "\n" +
+            "trigger_thickness," + simulation.trigger_thickness + "\n" +
+            "trigger_resolution," + simulation.trigger_resolution + "\n";
 
         // Actually run all the simulations
         double[][] simulation_output = run_simulations();
@@ -87,22 +88,16 @@ class Analyse {
         return output;
     }
 
-    public static double analyse() throws IOException {
-        ArrayList<double[]> csv = Helpers.read_CSV("./data.csv");
-        return analyse(csv.toArray(new double[csv.size()][]));
-    }
-
     public static double analyse(double[][] data) throws IOException {
         double count = 0;
         double estCount = 0;
-        double mom = simulation.momentum_limit;
 
         for (double[] row : data) {
-            if (row[2] >= mom) {
+            if (row[2] >= simulation.momentum_limit) {
                 count += 1;
             }
 
-            if (row[4] >= mom) {
+            if (row[4] >= simulation.momentum_limit) {
                 estCount += 1;
             }
         }

@@ -125,7 +125,6 @@ public class Simulation {
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
         // --- This kind of simulates the resolution of the detectors?
-
         double angle_a = get_detector_angle(p.getTraceAt(trigger_radius_A + trigger_thickness));
         double angle_b = get_detector_angle(p.getTraceAt(trigger_radius_B));
 
