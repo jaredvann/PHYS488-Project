@@ -1,6 +1,8 @@
 // Import statements
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 class Analyse {
     private static final int SAMPLE_SIZE = 3;
@@ -17,7 +19,9 @@ class Analyse {
         stepCount = 10;
         stepSize  = 10000;
 
-        Helpers.write_to_disk("./analysis.csv", run());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+
+        Helpers.write_to_disk("./data/" + sdf.format(new Date()) + ".csv", run());
     }
 
     public static double[][] run() throws IOException {
@@ -32,7 +36,7 @@ class Analyse {
             sim = new Simulation(config);
 
             out[i] = new double[(1+SAMPLE_SIZE)];
-            out[i][0] = config.momentum;
+            out[i][0] = config.momentumLimit;
 
             for (int j = 0; j < SAMPLE_SIZE; j++) {
                 out[i][(1+j)] = analyse(sim.simulate());
@@ -40,7 +44,7 @@ class Analyse {
                 iter += 1;
             }
 
-            config.momentum += stepSize;
+            config.momentumLimit += stepSize;
         }
 
         return out;
