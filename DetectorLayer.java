@@ -1,8 +1,7 @@
-import java.util.List;
 import java.util.ArrayList;
 
 class DetectorLayer extends AttenuatorLayer {
-    private List<Double> hits;
+    public ArrayList<Double> hits;
 
     public DetectorLayer(double _start,
                          double _end,
@@ -24,5 +23,4 @@ class DetectorLayer extends AttenuatorLayer {
     }
 
     public void addHit(double h) { hits.add(h); }
-    public List<Double> getHits() { return hits; }
 }

@@ -1,5 +1,3 @@
-import java.util.Random;
-import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.PrintWriter;
@@ -7,6 +5,8 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 
 class Helpers {
@@ -108,5 +108,15 @@ class Helpers {
         }
 
         return data;
+    }
+
+    public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
+        layers.sort(new Comparator<Layer>() {
+            @Override
+            public int compare(Layer l1, Layer l2) {
+                return (new Double(l1.start)).compareTo(l2.start);
+            }
+        });
+        return layers;
     }
 }

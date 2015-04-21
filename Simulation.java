@@ -1,19 +1,15 @@
 // Import statements
 import java.io.IOException;
-import java.util.List;
 import java.util.Random;
 import java.util.ArrayList;
-import java.util.Comparator;
 
-/**
- * Let's get our simulation on!
- */
+
 public class Simulation {
     private Random random;
     private Config config;
 
-    public List<DetectorLayer> detector_layers;
-    public List<Layer> layers;
+    public ArrayList<DetectorLayer> detector_layers;
+    public ArrayList<Layer> layers;
 
     public int num_particles;
     public double particle_mass;
@@ -73,7 +69,7 @@ public class Simulation {
     // This method replaces the particle factory class as it can all fit in
     // this one method
     // Gives a linear spread of angles and a Gaussian spread of momentums
-    public Particle makeParticle() {
+    public Particle newParticle() {
         return new Particle(
             // Mass
             particle_mass,
@@ -91,14 +87,11 @@ public class Simulation {
 
     // This is where the magic happens!
     public double[][] run_simulation() {
-        Particle[] particles = new Particle[num_particles];
         double[][] properties = new double[num_particles][];
         double estimation;
 
         for (int i = 0; i < num_particles; i++) {
-            // We'll remember the original muon details for safe-keeping
-            Particle particle = makeParticle();
-            particles[i] = new Particle(particle);
+            Particle particle = newParticle();
             properties[i] = new double[5];
 
             // particle.handle returns True if particle reaches edge of detector
@@ -115,7 +108,7 @@ public class Simulation {
             properties[i] = new double[]{
                 i+1,
                 particle.mass,
-                particles[i].momentum,
+                particle.original_momentum,
                 particle.momentum,
                 estimation
             };
@@ -208,7 +201,7 @@ public class Simulation {
     private void fillLayerGaps() {
         // Add detector layers
         layers.addAll(detector_layers);
-        order_layers();
+        layers = Helpers.orderLayers(layers);
 
         // Add vacuum layers to fill in gaps between physical layers
         ArrayList<Layer> layers2 = new ArrayList<Layer>();
@@ -229,27 +222,17 @@ public class Simulation {
         // Add vacuum (field) layers to the rest of the layers
         layers.addAll(layers2);
         // Make sure everything is in order
-        order_layers();
-    }
-
-    // Method to sort layers in order of ascending radius
-    private void order_layers() {
-        layers.sort(new Comparator<Layer>() {
-            @Override
-            public int compare(Layer l1, Layer l2) {
-                return (new Double(l1.start)).compareTo(l2.start);
-            }
-        });
+        layers = Helpers.orderLayers(layers);
     }
 
     // Exports data in the format used by the DetectorViewer visualisation
     private void exportViewerData() throws IOException {
         double[][] layers = new double[detector_layers.size()][];
         for (int i = 0; i < layers.length; i++) {
-            layers[i] = new double[detector_layers.get(i).getHits().size()];
+            layers[i] = new double[detector_layers.get(i).hits.size()];
 
             for (int j = 0; j < layers[i].length; j++) {
-                layers[i][j] = detector_layers.get(i).getHits().get(j);
+                layers[i][j] = detector_layers.get(i).hits.get(j);
             }
         }
 

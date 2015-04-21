@@ -1,4 +1,6 @@
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -8,7 +10,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 
 public class DetectorViewer extends Application {
     private static Config config;
@@ -20,6 +21,8 @@ public class DetectorViewer extends Application {
     // Radius of detector
     private double radius = 1000;
     private double scale_factor;
+
+    private static int MAX_HITS = 10;
 
     private double PI2 = Math.PI/2;
 
@@ -54,7 +57,7 @@ public class DetectorViewer extends Application {
 
         // Add data to relevant detectors
         for (int i = 0; i < detector_layers.size(); i++) {
-            for (int j = 0; j < data.get(i).length; j++) {
+            for (int j = 0; j < Math.min(data.get(i).length, MAX_HITS); j++) {
                 detector_layers.get(i).addHit(data.get(i)[j]);
             }
         }
@@ -69,7 +72,7 @@ public class DetectorViewer extends Application {
     @Override
     public void start(Stage stage) {
         // Sort layers into correct order, will not draw correctly otherwise
-        sortLayers();
+        layers = orderLayers(layers);
 
         // Setup JavaFX canvas
         Group root = new Group();
@@ -87,16 +90,6 @@ public class DetectorViewer extends Application {
         stage.show();
     }
 
-    private void sortLayers() {
-        layers.sort(new Comparator<Layer>() {
-            @Override
-            public int compare(Layer l1, Layer l2) {
-                Double r1 = l2.start;
-                return r1.compareTo(l1.start);
-            }
-        });
-    }
-
     private void drawDetector(GraphicsContext gc) {
         double r;
 
@@ -112,11 +105,12 @@ public class DetectorViewer extends Application {
     }
 
     private void drawPoints(GraphicsContext gc) {
-        double r; double r2 = 4;
+        double r; double r2 = 4; double angle;
 
         for (DetectorLayer detector: detector_layers) {
             r = detector.start * scale_factor;
-            for (double angle : detector.getHits()) {
+            for (int i = 0; i < detector.hits.size(); i++) {
+                angle = detector.hits.get(i);
                 gc.setFill(Color.BLACK);
                 gc.fillOval(
                     width/2 + r*Math.cos(angle) - r2/2,
@@ -125,5 +119,15 @@ public class DetectorViewer extends Application {
                 );
             }
         }
+    }
+
+    public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
+        layers.sort(new Comparator<Layer>() {
+            @Override
+            public int compare(Layer l1, Layer l2) {
+                return (new Double(l2.start)).compareTo(l1.start);
+            }
+        });
+        return layers;
     }
 }

@@ -5,6 +5,7 @@ import java.util.SortedMap;
 public class Particle {
     public double mass; // MeV
     public double momentum; // MeV
+    public double original_momentum;
     public double direction; // Radians
     public double azimuth; // Radians
     public double charge; // e (Charge on an electron)
@@ -17,6 +18,7 @@ public class Particle {
                     double _azimuth) {
         mass = _mass;
         momentum = _momentum;
+        original_momentum = _momentum;
         direction = _direction;
         azimuth = _azimuth;
 
