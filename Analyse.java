@@ -16,12 +16,25 @@ class Analyse {
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
-        stepCount = 10;
+        stepCount = 1;
         stepSize  = 10000;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
-        Helpers.write_to_disk("./data/" + sdf.format(new Date()) + ".csv", run());
+        Helpers.write_to_disk(
+            "./data/" + sdf.format(new Date()) + ".csv",
+            run(),
+            "num_particles," + config.numParticles + "\n" +
+            "mass," + config.masses[0] + "\n" +
+            "magField," + config.magField + "\n" +
+            "momentum," + config.momentum + "\n" +
+            "momentumSmear," + config.momentumSmear + "\n" +
+            "momentumLimit," + config.momentumLimit + "\n" +
+            "triggerRadiusA," + config.triggerRadiusA + "\n" +
+            "triggerRadiusB," + config.triggerRadiusB + "\n" +
+            "triggerThickness," + config.triggerThickness + "\n" +
+            "triggerResolution," + config.triggerResolution + "\n"
+        );
     }
 
     public static double[][] run() throws IOException {

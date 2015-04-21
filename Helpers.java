@@ -47,12 +47,20 @@ class Helpers {
     }
 
     public static boolean write_to_disk(String filepath, double[][] data) throws IOException {
+        return write_to_disk(filepath, data, "");
+    }
+
+    public static boolean write_to_disk(String filepath, double[][] data, String header) throws IOException {
         FileWriter file;
         PrintWriter toFile = null;
 
         try {
             file = new FileWriter(filepath); // File stream
             toFile = new PrintWriter(file); // File writer
+
+            if (header != "") {
+                toFile.print(header + "\n,\n");
+            }
 
             for (double[] line : data) {
                 for (double item : line)
