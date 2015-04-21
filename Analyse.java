@@ -38,24 +38,42 @@ class Analyse {
     }
 
     public static double[][] run() throws IOException {
+        // Create array for output data
         double[][] out = new double[stepCount][];
+
+        double sum;
+        double value;
 
         Simulation sim;
 
         System.out.println("[*] 0%");
 
         int iter = 1;
+        // Loop through each step
         for (int i = 0; i < stepCount; i++) {
+            // Create new simulation instance with step specific config values
             sim = new Simulation(config);
 
-            out[i] = new double[(1+sampleSize)];
+            // Initialise sub-array to hold sample results
+            out[i] = new double[(2+sampleSize)];
+
+            // Set the first value to the variating config value
             out[i][0] = config.momentumLimit;
 
+            sum = 0;
+
+            // Run samples
             for (int j = 0; j < sampleSize; j++) {
-                out[i][(1+j)] = analyse(sim.simulate());
+                value = analyse(sim.simulate());
+                out[i][(1+j)] = value;
+                sum += value;
+
                 System.out.println("[*] " + ((iter)*100 / (sampleSize*stepCount)) + "%");
                 iter += 1;
             }
+
+            // Add average value of all samples to end of line
+            out[i][sampleSize+1] = sum / sampleSize;
 
             config.momentumLimit += stepSize;
         }
