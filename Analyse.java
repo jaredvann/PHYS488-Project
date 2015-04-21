@@ -5,18 +5,18 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 class Analyse {
-    private static final int SAMPLE_SIZE = 3;
-
     private static Config config;
 
     private static double min;
+    private static int sampleSize;
     private static int stepCount;
     private static double stepSize;
 
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
-        stepCount = config.getDouble("step_count");
+        sampleSize = config.getInt("sample_size");
+        stepCount = config.getInt("step_count");
         stepSize  = config.getDouble("step_size");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
@@ -48,12 +48,12 @@ class Analyse {
         for (int i = 0; i < stepCount; i++) {
             sim = new Simulation(config);
 
-            out[i] = new double[(1+SAMPLE_SIZE)];
+            out[i] = new double[(1+sampleSize)];
             out[i][0] = config.momentumLimit;
 
-            for (int j = 0; j < SAMPLE_SIZE; j++) {
+            for (int j = 0; j < sampleSize; j++) {
                 out[i][(1+j)] = analyse(sim.simulate());
-                System.out.println("[*] " + ((iter)*100 / (SAMPLE_SIZE*stepCount)) + "%");
+                System.out.println("[*] " + ((iter)*100 / (sampleSize*stepCount)) + "%");
                 iter += 1;
             }
 
