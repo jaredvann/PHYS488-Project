@@ -16,8 +16,8 @@ class Analyse {
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
-        stepCount = 1;
-        stepSize  = 10000;
+        stepCount = config.getDouble("step_count");
+        stepSize  = config.getDouble("step_size");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
