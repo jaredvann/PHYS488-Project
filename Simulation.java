@@ -103,9 +103,9 @@ public class Simulation {
         //                    these are the angles phi_9A and phi_9B
         // The results slightly smeared using Helpers.gauss
         // --- This kind of simulates the resolution of the detectors?
-        double angle_a = Helpers.gauss(p.getTraceAt(cfg.triggerRadiusA + cfg.triggerThickness), cfg.triggerResolution);
-        double angle_b =
-            Helpers.gauss(p.getTraceAt(cfg.triggerRadiusB), cfg.triggerResolution);
+
+        double angle_a = get_detector_angle(p.getTraceAt(cfg.triggerRadiusA + cfg.triggerThickness));
+        double angle_b = get_detector_angle(p.getTraceAt(cfg.triggerRadiusB));
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta =
@@ -117,11 +117,8 @@ public class Simulation {
     }
 
     public double get_detector_angle(double angle) {
-        angle *= 100000;
-        angle = Math.round(angle);
-        angle /= 100000;
-
-        return angle;
+        double binsize = cfg.triggerResolution;
+        return Math.round(angle/binsize) * binsize;
     }
 
     // ---------- Layer Management ----------

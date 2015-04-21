@@ -59,7 +59,7 @@ public class Config {
             getDouble("cd_radius_b") : 91;
         triggerThickness = (hasKey("cd_thickness")) ?
             getDouble("cd_thickness") : 0.05;
-        triggerThickness = (hasKey("cd_resolution")) ?
+        triggerResolution = (hasKey("cd_resolution")) ?
             getDouble("cd_resolution") : 0.00005;
     }
 
