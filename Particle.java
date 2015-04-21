@@ -3,13 +3,13 @@ import java.util.TreeMap;
 import java.util.SortedMap;
 
 public class Particle {
-    private double mass; // MeV
-    private double momentum; // MeV
-    private double direction; // Radians
-    private double azimuth; // Radians
-    private double charge; // e (Charge on an electron)
+    public double mass; // MeV
+    public double momentum; // MeV
+    public double direction; // Radians
+    public double azimuth; // Radians
+    public double charge; // e (Charge on an electron)
 
-    private SortedMap<Double, Double> trace;
+    public SortedMap<Double, Double> trace;
 
     public Particle(double _mass,
                     double _momentum,
@@ -28,10 +28,10 @@ public class Particle {
 
     public Particle(Particle p) {
         this(
-            p.getMass(),
-            p.getMomentum(),
-            p.getDirection(),
-            p.getAzimuth()
+            p.mass,
+            p.momentum,
+            p.direction,
+            p.azimuth
         );
     }
 
@@ -55,27 +55,21 @@ public class Particle {
     public double getX(double radius) { return radius * Math.cos(azimuth); }
     public double getY(double radius) { return radius * Math.sin(azimuth); }
 
-    // ---------- Getters & Setters ----------
+    // ---------- Setters ----------
 
-    public double getMass() { return mass; }
     public void setMass(double _mass) { mass = _mass; }
 
-    public double getMomentum() { return momentum; }
     public void setMomentum(double _momentum) { momentum = _momentum; }
 
-    public double getDirection() { return direction; }
     public void setDirection(double _direction) { direction = _direction; }
 
-    public double getAzimuth() { return azimuth; }
     public void setAzimuth(double _azimuth) { azimuth = _azimuth; }
     public void setAzimuth(double _radius, double _azimuth) {
         azimuth = _azimuth;
         trace.put(_radius, _azimuth);
     }
 
-    public double getCharge() { return charge; }
     public void setCharge(double _charge) { charge = _charge; }
 
-    public SortedMap<Double, Double> getTrace() { return trace; }
     public double getTraceAt(double r) { return trace.get(r); }
 }

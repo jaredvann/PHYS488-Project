@@ -35,19 +35,19 @@ public class DetectorViewer extends Application {
 
         // Create all layers
         for (double r : beryllium)
-            layers.add(new Layer("", r, r+6));
+            layers.add(new Layer(r, r+6));
 
         for (double r : silicon)
-            layers.add(new Layer("", r, r+2));
+            layers.add(new Layer(r, r+2));
 
         for (double r : coincidence)
-            layers.add(new Layer("", r, r+1));
+            layers.add(new Layer(r, r+1));
 
         for (double r : silicon)
-            detector_layers.add(new DetectorLayer("Detector", r));
+            detector_layers.add(new DetectorLayer(r));
 
         for (double r : coincidence)
-            detector_layers.add(new DetectorLayer("CoincidenceDetector", r));
+            detector_layers.add(new DetectorLayer(r));
 
         // Load hits data
         ArrayList<double[]> data = Helpers.read_CSV("layers.csv");
@@ -101,11 +101,11 @@ public class DetectorViewer extends Application {
         double r;
 
         for (Layer layer : layers) {
-            r = layer.getEnd() * scale_factor;
-            gc.setFill(layer.color);
+            r = layer.end * scale_factor;
+            gc.setFill(Color.GREY);
             gc.fillOval(width/2-r, height/2-r, r*2, r*2);
 
-            r = layer.getStart() * scale_factor;
+            r = layer.start * scale_factor;
             gc.setFill(Color.WHITE);
             gc.fillOval(width/2-r, height/2-r, r*2, r*2);
         }
@@ -115,7 +115,7 @@ public class DetectorViewer extends Application {
         double r; double r2 = 4;
 
         for (DetectorLayer detector: detector_layers) {
-            r = detector.getStart() * scale_factor;
+            r = detector.start * scale_factor;
             for (double angle : detector.getHits()) {
                 gc.setFill(Color.BLACK);
                 gc.fillOval(

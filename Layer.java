@@ -1,35 +1,17 @@
-import javafx.scene.paint.Color;
-
 public class Layer {
-    protected String name;
+    public String name;
 
-    protected double start;
-    protected double end;
+    public double start;
+    public double end;
 
-    protected Color color = new Color(0.5, 0.5, 0.5, 1.0);
-
-    public Layer(String _name, double _start, double _end) {
-        name = _name;
+    public Layer(double _start, double _end) {
         start = _start;
         end = _end;
     }
 
-    // ---------- Handlers ----------
-
+    // This method must be created by all implementations of the layer class
     public boolean handle(Particle p) { return false; }
 
-    // ---------- Helpers ----------
-
+    // Helper method
     public double getThickness() { return end - start; }
-
-    // ---------- Getters & Setters ----------
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public double getStart() { return start; }
-    public void setStart(double _start) { start = _start; }
-
-    public double getEnd() { return end; }
-    public void setEnd(double _end) { end = _end; }
 }
