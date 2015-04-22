@@ -1,4 +1,5 @@
 // Import statements
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class Simulation {
     // This method is called if the Simulation file is run directly
     // (eg. not from the Analyse class)
     public static void main(String[] args) throws IOException {
+        PrintWriter screen = new PrintWriter(System.out, true);
         Simulation simulation = new Simulation();
 
         System.out.println("Simulation started.");
@@ -64,6 +66,27 @@ public class Simulation {
         simulation.exportViewerData();
 
         System.out.println("Simulation completed.");
+
+        // Debugging
+        String left_align_format = "| %-5d | %-4.0f | %-16.2f | %-14.2f | %-10.2f | %-5.1f%% |%n";
+
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+        screen.format("| ID    | Mass | Initial Momentum | Final Momentum | Estimation | QOP    |%n");
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+
+        for (int i = 0; i < properties.length; i++) {
+            screen.format(
+                left_align_format,
+                (i+1),
+                properties[i][1],
+                properties[i][2],
+                properties[i][3],
+                properties[i][4],
+                (properties[i][4] * 100 / properties[i][3])
+            );
+        }
+
+        screen.format("+-------+------+------------------+----------------+------------+--------+%n");
     }
 
     // This method replaces the particle factory class as it can all fit in

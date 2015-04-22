@@ -58,29 +58,34 @@ class Analyse {
         // Loop through each step
         for (int i = 0; i < step_count; i++) {
             // Initialise sub-array to hold sample results
-            output[i] = new double[(2+sample_size)];
+            output[i] = new double[(3+sample_size)];
 
             // Set the first value to the variating config value
             //                        vvvvv -- CHANGE THIS VARIABLE
-            output[i][0] = simulation.momentum_limit;
+            output[i][0] = simulation.momentum;
 
             sum = 0;
 
             // Run samples
+            double[] sample = new double[sample_size];
             for (int j = 0; j < sample_size; j++) {
                 System.out.println("Running simulation " + (i*sample_size + j+1) + "/" + step_count*sample_size);
 
                 value = analyse(simulation.run_simulation());
-                output[i][(1+j)] = value;
+                output[i][(1+j)] = sample[j] = value;
+
                 sum += value;
             }
 
-            // Add average value of all samples to end of line
-            output[i][sample_size+1] = sum / sample_size;
+            // Add average and stderr values of all samples to end of line
+            double mean = sum / sample_size;
+
+            output[i][sample_size+1] = mean;
+            output[i][sample_size+2] = stderr(sample, mean);
 
             // Increment the value of the changing parameter for the next iteration
             //         vvvvv -- CHANGE THIS VARIABLE
-            simulation.momentum_limit += step_size;
+            simulation.momentum += step_size;
         }
 
         System.out.println("Simulations and analysis finished");
@@ -103,5 +108,13 @@ class Analyse {
         }
 
         return estCount*100 / count;
+    }
+
+    private static double stderr(double[] values, double mean) {
+        double sum = 0;
+        for (int i = 0; i < values.length; i++)
+            sum += (values[i] - mean) * (values[i] - mean);
+
+        return (Math.sqrt(sum) / values.length);
     }
 }
