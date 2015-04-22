@@ -22,8 +22,6 @@ public class DetectorViewer extends Application {
     private double radius = 1000;
     private double scale_factor;
 
-    private static int MAX_HITS = 10;
-
     private double PI2 = Math.PI/2;
 
     private static ArrayList<Layer> layers = new ArrayList<Layer>();
@@ -56,8 +54,8 @@ public class DetectorViewer extends Application {
         ArrayList<double[]> data = Helpers.read_CSV("layers.csv");
 
         // Add data to relevant detectors
-        for (int i = 0; i < detector_layers.size(); i++) {
-            for (int j = 0; j < Math.min(data.get(i).length, MAX_HITS); j++) {
+        for (int i = 0; i < data.size(); i++) {
+            for (int j = 0; j < data.get(i).length; j++) {
                 detector_layers.get(i).addHit(data.get(i)[j]);
             }
         }
