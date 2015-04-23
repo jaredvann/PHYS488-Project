@@ -34,20 +34,21 @@ public class Simulation {
 
         num_particles = config.getInt("num_particles");
         particle_mass = config.getDouble("particle_mass");
-        mag_field = config.getDouble("mag_field");
+        mag_field     = config.getDouble("mag_field");
 
-        momentum = config.getDouble("momentum");
+        momentum       = config.getDouble("momentum");
         momentum_smear = config.getDouble("momentum_smear");
         momentum_limit = config.getDouble("momentum_limit");
 
-        trigger_radius_A = config.getDouble("trigger_radius_A");
-        trigger_radius_B = config.getDouble("trigger_radius_B");
-        trigger_thickness = config.getDouble("trigger_thickness");
+        trigger_radius_A   = config.getDouble("trigger_radius_A");
+        trigger_radius_B   = config.getDouble("trigger_radius_B");
+        trigger_thickness  = config.getDouble("trigger_thickness");
         trigger_resolution = config.getDouble("trigger_resolution");
 
         // Initialize layer arrays
         detector_layers = new ArrayList<DetectorLayer>();
         layers          = new ArrayList<Layer>();
+
         generateLayers();
     }
 
@@ -87,6 +88,20 @@ public class Simulation {
         }
 
         screen.format("+-------+------+------------------+----------------+------------+--------+%n");
+
+        int count = 0;
+        int estCount = 0;
+        for (double[] p : properties) {
+            if (p[3] >= simulation.momentum_limit)
+                count += 1;
+
+            if (p[4] >= simulation.momentum_limit)
+                estCount += 1;
+        }
+
+        screen.println("\n[*] Actual Count:    " + count);
+        screen.println("[*] Estimated Count: " + estCount);
+        screen.println("[*] Efficiency:      " + (estCount*100/count) + "%\n");
     }
 
     // This method replaces the particle factory class as it can all fit in
