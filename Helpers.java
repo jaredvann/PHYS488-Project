@@ -1,12 +1,7 @@
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.util.Random;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 
 
 class Helpers {
@@ -16,8 +11,6 @@ class Helpers {
     public static final double MASS_ELECTRON = 0.511; // MeV
 
     public static final int CHARGE_ELECTRON = 1; // 1.60E-19 C
-
-    public static final double SPEED_OF_LIGHT = 2.99792458E8;
 
     public static double beta(double mass, double momentum) {
         return momentum / energy(mass, momentum);
@@ -85,7 +78,7 @@ class Helpers {
 
         try {
             br = new BufferedReader(new FileReader(filepath));
-            String line = null;
+            String line;
 
             String[] cols;
             double[] dCols;
@@ -99,7 +92,6 @@ class Helpers {
 
                 data.add(dCols);
             }
-        } catch (FileNotFoundException e) { e.printStackTrace();
         } catch (IOException e) { e.printStackTrace();
         } finally {
             if (br != null)
@@ -111,12 +103,7 @@ class Helpers {
     }
 
     public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
-        layers.sort(new Comparator<Layer>() {
-            @Override
-            public int compare(Layer l1, Layer l2) {
-                return (new Double(l1.start)).compareTo(l2.start);
-            }
-        });
+        layers.sort((l1, l2) -> (new Double(l1.start)).compareTo(l2.start));
         return layers;
     }
 }

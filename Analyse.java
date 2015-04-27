@@ -1,14 +1,12 @@
 // Import statements
-import java.util.Date;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 class Analyse {
     private static Config config;
     private static Simulation simulation;
 
-    private static double min;
     private static int sample_size;
     private static int step_count;
     private static double step_size;

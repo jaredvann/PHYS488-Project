@@ -16,7 +16,6 @@ class FieldLayer extends Layer {
     public boolean handle(Particle p) {
         double pX, pY;
         double lX, lY, lTheta;
-        double trajectoryRadius;
 
         // Store particle properties as local variables
         double pAzimuth   = p.azimuth;

@@ -1,13 +1,11 @@
 // Import statements
-import java.io.PrintWriter;
 import java.io.IOException;
-import java.util.Random;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-
+import java.util.Random;
 
 public class Simulation {
     private Random random;
-    private Config config;
 
     public ArrayList<DetectorLayer> detector_layers;
     public ArrayList<Layer> layers;
@@ -101,7 +99,7 @@ public class Simulation {
 
         screen.println("\n[*] Actual Count:    " + count);
         screen.println("[*] Estimated Count: " + estCount);
-        screen.println("[*] Efficiency:      " + (estCount*100/count) + "%\n");
+        screen.println("[*] Efficiency:      " + ((count == 0) ? 0 : (estCount*100/count)) + "%\n");
     }
 
     // This method replaces the particle factory class as it can all fit in
@@ -169,17 +167,15 @@ public class Simulation {
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta =
             Math.abs(Math.atan(trigger_radius_B*(angle_b - angle_a)/range));
-        double momentum_est =
-            1000 * 0.3 * mag_field * trigger_radius_B / (2*delta);
 
-        return momentum_est;
+        return 1000 * 0.3 * mag_field * trigger_radius_B / (2*delta);
     }
 
     // Allocates angles into bins of discrete steps which fairly accurately
     // detectors in a real detector system
     public double get_detector_angle(double angle) {
         // trigger_resolution == 'Bin Size'
-        return Math.round(angle/trigger_resolution) * trigger_resolution;
+        return Math.round(angle/trigger_resolution) * (trigger_resolution);
     }
 
     // Sets up all the physical detector layers and the empty gaps inbetween

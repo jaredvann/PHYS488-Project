@@ -1,7 +1,3 @@
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -10,10 +6,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 
 public class DetectorViewer extends Application {
-    private static Config config;
-
     // Window size
     private int width = 800;
     private int height = 800;
@@ -22,14 +19,10 @@ public class DetectorViewer extends Application {
     private double radius = 1000;
     private double scale_factor;
 
-    private double PI2 = Math.PI/2;
-
     private static ArrayList<Layer> layers = new ArrayList<Layer>();
     private static ArrayList<DetectorLayer> detector_layers = new ArrayList<DetectorLayer>();
 
     public static void main(String[] args) throws IOException {
-        config = new Config("config.properties");
-
         double[] beryllium = {35};
         double[] silicon = {45, 80, 120, 180, 300, 400, 500, 700};
         double[] coincidence = {900, 910};
@@ -120,12 +113,7 @@ public class DetectorViewer extends Application {
     }
 
     public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
-        layers.sort(new Comparator<Layer>() {
-            @Override
-            public int compare(Layer l1, Layer l2) {
-                return (new Double(l2.start)).compareTo(l1.start);
-            }
-        });
+        layers.sort((l1, l2) -> (new Double(l2.start)).compareTo(l1.start));
         return layers;
     }
 }

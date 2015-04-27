@@ -41,8 +41,6 @@ class Attenuator {
     }
 
     public double getEnergyLoss(double mass, double momentum) {
-        double m_e = Helpers.MASS_ELECTRON;
-
         double b2 = Math.pow(Helpers.beta(mass, momentum), 2); // Beta(p)^2
         double g2 = 1/(1 - b2); // Gamma(p)^2
 

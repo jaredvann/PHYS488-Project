@@ -1,5 +1,6 @@
 //This file has several checks of individual methods to see if they return sensible results.
-import java.io.*;
+
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 
 class TestAttenuator {

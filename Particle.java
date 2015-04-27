@@ -27,15 +27,6 @@ public class Particle {
         this.trace.put(0.0, 0.0);
     }
 
-    public Particle(Particle p) {
-        this(
-            p.mass,
-            p.momentum,
-            p.direction,
-            p.azimuth
-        );
-    }
-
     public boolean handle(List<Layer> layers) {
         // Send the muon through all the layers in the accelerator
         for (Layer layer : layers) {
