@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Random;
 
 
@@ -44,16 +43,20 @@ class Helpers {
     }
 
     public static boolean write_to_disk(String filepath, double[][] data, String header) throws IOException {
+        File dir;
         FileWriter file;
         PrintWriter toFile = null;
 
         try {
+            dir = new File("./data");
+            if (!dir.exists())
+                dir.mkdir();
+
             file = new FileWriter(filepath); // File stream
             toFile = new PrintWriter(file); // File writer
 
-            if (header != "") {
+            if (header != "")
                 toFile.print(header + "\n,\n");
-            }
 
             for (double[] line : data) {
                 for (double item : line)

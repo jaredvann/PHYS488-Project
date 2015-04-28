@@ -51,8 +51,13 @@ public class Particle {
     public void setAzimuth(double _azimuth) { azimuth = _azimuth; }
     public void setAzimuth(double _radius, double _azimuth) {
         azimuth = _azimuth;
+
+        _radius = Math.round(_radius*100) / 100;
         trace.put(_radius, _azimuth);
     }
 
-    public double getTraceAt(double r) { return trace.get(r); }
+    public double getTraceAt(double r) {
+        r = Math.round(r*100) / 100;
+        return trace.get(r);
+    }
 }

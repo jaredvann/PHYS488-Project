@@ -1,4 +1,5 @@
 // Import statements
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -205,14 +206,14 @@ public class Simulation {
         l.end = radius + trigger_thickness;
     }
 
-    // Allocates angles into bins of discrete steps which fairly accurately
-    // detectors in a real detector system
+    // Smears the angle using a gaussian distribution
     private double get_detector_angle(double angle) {
         // trigger_resolution == 'Bin Size'
-        return Math.round(angle/trigger_resolution) * (trigger_resolution);
+        // return Math.round(angle/trigger_resolution) * (trigger_resolution);
+        return Helpers.gauss(angle, trigger_resolution);
     }
 
-    // Sets up all the physical detector layers and the empty gaps inbetween
+    // Sets up all the physical detector layers and the empty gaps in between
     private void generateLayers() {
         // Silicon detector (sd) radii and thickness of layers
         double[] sd_radius = { 4.5, 8, 12, 18, 30, 40, 50, 70 };
