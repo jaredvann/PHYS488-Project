@@ -1,8 +1,8 @@
 class FieldLayer extends Layer {
-    private static int STEPS = 100;
+    public double field;
 
-    private double field;
     private double stepSize;
+    private static final int STEPS = 100;
 
     public FieldLayer(double _start,
                       double _end,

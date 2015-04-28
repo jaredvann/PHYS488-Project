@@ -7,16 +7,19 @@ class Analyse {
     private static Config config;
     private static Simulation simulation;
 
-    private static int sample_size;
+    private static String step_var;
     private static int step_count;
     private static double step_size;
+
+    private static int sample_size;
 
     public static void main(String[] args) throws IOException {
         config = new Config("config.properties");
 
-        sample_size = config.getInt("sample_size");
+        step_var = config.get("step_var");
         step_count = config.getInt("step_count");
         step_size  = config.getDouble("step_size");
+        sample_size = config.getInt("sample_size");
 
         simulation = new Simulation();
 
@@ -27,16 +30,16 @@ class Analyse {
 
         // Add the general parameters of the simulation to the top of the output
         String header =
-            "num_particles," + simulation.num_particles + "\n" +
-            "particle_mass," + simulation.particle_mass + "\n" +
-            "mag_field," + simulation.mag_field + "\n" +
-            "momentum," + simulation.momentum + "\n" +
-            "momentum_smear," + simulation.momentum_smear + "\n" +
-            "momentum_limit," + simulation.momentum_limit + "\n" +
-            "trigger_radius_A," + simulation.trigger_radius_A + "\n" +
-            "trigger_radius_B," + simulation.trigger_radius_B + "\n" +
-            "trigger_thickness," + simulation.trigger_thickness + "\n" +
-            "trigger_resolution," + simulation.trigger_resolution + "\n";
+                "num_particles," + simulation.num_particles + "\n" +
+                        "particle_mass," + simulation.particle_mass + "\n" +
+                        "mag_field," + simulation.mag_field + "\n" +
+                        "momentum," + simulation.momentum + "\n" +
+                        "momentum_smear," + simulation.momentum_smear + "\n" +
+                        "momentum_limit," + simulation.momentum_limit + "\n" +
+                        "trigger_radius_A," + simulation.trigger_radius_A + "\n" +
+                        "trigger_radius_B," + simulation.trigger_radius_B + "\n" +
+                        "trigger_thickness," + simulation.trigger_thickness + "\n" +
+                        "trigger_resolution," + simulation.trigger_resolution + "\n";
 
         // Actually run all the simulations
         double[][] simulation_output = run_simulations();
@@ -59,8 +62,7 @@ class Analyse {
             output[i] = new double[(3+sample_size)];
 
             // Set the first value to the variating config value
-            //                        vvvvv -- CHANGE THIS VARIABLE
-            output[i][0] = simulation.momentum;
+            output[i][0] = getVar();
 
             sum = 0;
 
@@ -82,8 +84,7 @@ class Analyse {
             output[i][sample_size+2] = stderr(sample, mean);
 
             // Increment the value of the changing parameter for the next iteration
-            //         vvvvv -- CHANGE THIS VARIABLE
-            simulation.momentum += step_size;
+            updateVar(getVar() + step_size);
         }
 
         System.out.println("Simulations and analysis finished");
@@ -108,10 +109,57 @@ class Analyse {
         return estCount*100 / count;
     }
 
+    private static double getVar() {
+        switch(step_var) {
+            case "momentum":
+                return simulation.momentum;
+            case "limit":
+                return simulation.momentum_limit;
+            case "field":
+                return simulation.mag_field;
+            case "radiusA":
+                return simulation.trigger_radius_A;
+            case "radiusB":
+                return simulation.trigger_radius_B;
+            case "resolution":
+                return simulation.trigger_resolution;
+            case "thickness":
+                return simulation.trigger_thickness;
+        }
+
+        return 0;
+    }
+
+    private static void updateVar(double val) {
+        switch(step_var) {
+            case "momentum":
+                simulation.momentum = val;
+                break;
+            case "limit":
+                simulation.momentum_limit = val;
+                break;
+            case "field":
+                simulation.updateFieldLayers(val);
+                break;
+            case "radiusA":
+                simulation.updateTriggerRadiusA(val);
+                break;
+            case "radiusB":
+                simulation.updateTriggerRadiusB(val);
+                break;
+            case "resolution":
+                simulation.trigger_resolution = val;
+                break;
+            case "thickness":
+                simulation.updateTriggerThickness(val);
+                break;
+        }
+    }
+
     private static double stderr(double[] values, double mean) {
         double sum = 0;
-        for (int i = 0; i < values.length; i++)
-            sum += (values[i] - mean) * (values[i] - mean);
+        for (double val : values)
+            sum += (val - mean) * (val - mean);
 
         return (Math.sqrt(sum) / values.length);
     }

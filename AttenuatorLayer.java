@@ -12,7 +12,7 @@ public class AttenuatorLayer extends Layer {
 
         // Step size proportional to thickness of attenuator to give a good
         // change of particles getting through
-        stepSize = getThickness() / STEPS;
+        stepSize = (end - start) / STEPS;
         attn = _attn;
     }
 

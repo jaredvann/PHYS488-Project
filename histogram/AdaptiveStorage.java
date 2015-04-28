@@ -1,9 +1,9 @@
 package histogram;
 
 // Import statements
+
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.ArrayList;
 
 public class AdaptiveStorage extends HistogramStorage {
     private Tree<Bin> tree;

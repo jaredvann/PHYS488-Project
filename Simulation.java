@@ -75,13 +75,13 @@ public class Simulation {
 
         for (int i = 0; i < properties.length; i++) {
             screen.format(
-                left_align_format,
-                (i+1),
-                properties[i][1],
-                properties[i][2],
-                properties[i][3],
-                properties[i][4],
-                (properties[i][4] * 100 / properties[i][3])
+                    left_align_format,
+                    (i+1),
+                    properties[i][1],
+                    properties[i][2],
+                    properties[i][3],
+                    properties[i][4],
+                    (properties[i][4] * 100 / properties[i][3])
             );
         }
 
@@ -100,25 +100,6 @@ public class Simulation {
         screen.println("\n[*] Actual Count:    " + count);
         screen.println("[*] Estimated Count: " + estCount);
         screen.println("[*] Efficiency:      " + ((count == 0) ? 0 : (estCount*100/count)) + "%\n");
-    }
-
-    // This method replaces the particle factory class as it can all fit in
-    // this one method
-    // Gives a linear spread of angles and a Gaussian spread of momentums
-    public Particle newParticle() {
-        return new Particle(
-            // Mass
-            particle_mass,
-            // Momentum Smear
-            Math.abs(Helpers.gauss(
-                momentum,
-                momentum * momentum_smear
-            )),
-            // Direction
-            random.nextDouble()*(2*Math.PI),
-            // Azimuth
-            0
-        );
     }
 
     // This is where the magic happens!
@@ -142,21 +123,39 @@ public class Simulation {
 
             // Add the information we need to an array and store it for analysis
             properties[i] = new double[]{
-                i+1,
-                particle.mass,
-                particle.original_momentum,
-                particle.momentum,
-                estimation
+                    i+1,
+                    particle.mass,
+                    particle.original_momentum,
+                    particle.momentum,
+                    estimation
             };
         }
 
         return properties;
     }
 
+    // This method replaces the particle factory class as it can all fit in
+    // this one method
+    // Gives a linear spread of angles and a Gaussian spread of momentums
+    public Particle newParticle() {
+        return new Particle(
+                // Mass
+                particle_mass,
+                // Momentum Smear
+                Math.abs(Helpers.gauss(
+                        momentum,
+                        momentum * momentum_smear
+                )),
+                // Direction
+                random.nextDouble()*(2*Math.PI),
+                // Azimuth
+                0
+        );
+    }
+
     public double estimateMomentum(Particle p) {
         // Get Coincidence Deteector properties
         double range = trigger_radius_B - (trigger_radius_A + trigger_thickness);
-
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
@@ -166,14 +165,49 @@ public class Simulation {
 
         // Estimate particle momentum (*1000 to convert GeV -> MeV)
         double delta =
-            Math.abs(Math.atan(trigger_radius_B*(angle_b - angle_a)/range));
+                Math.abs(Math.atan(trigger_radius_B*(angle_b - angle_a)/range));
 
         return 1000 * 0.3 * mag_field * trigger_radius_B / (2*delta);
     }
 
+    public void updateFieldLayers(double field) {
+        mag_field = field;
+
+        for (Layer l : layers)
+            if (l instanceof FieldLayer) {
+                FieldLayer fl = (FieldLayer) l;
+                fl.field = field;
+            }
+    }
+
+    public void updateTriggerThickness(double thick) {
+        Layer a = layers.get(layers.size()-3);
+        Layer b = layers.get(layers.size()-1);
+
+        trigger_thickness = thick;
+        a.end = a.start + thick;
+        b.end = b.start + thick;
+    }
+
+    public void updateTriggerRadiusA(double radius) {
+        Layer l = layers.get(layers.size()-3);
+
+        trigger_radius_A = radius;
+        l.start = radius;
+        l.end = radius + trigger_thickness;
+    }
+
+    public void updateTriggerRadiusB(double radius) {
+        Layer l = layers.get(layers.size() - 1);
+
+        trigger_radius_B = radius;
+        l.start = radius;
+        l.end = radius + trigger_thickness;
+    }
+
     // Allocates angles into bins of discrete steps which fairly accurately
     // detectors in a real detector system
-    public double get_detector_angle(double angle) {
+    private double get_detector_angle(double angle) {
         // trigger_resolution == 'Bin Size'
         return Math.round(angle/trigger_resolution) * (trigger_resolution);
     }
@@ -190,39 +224,39 @@ public class Simulation {
 
         // Add beryllium beam pipe
         layers.add(
-            new AttenuatorLayer(
-                3.5, // Start radius
-                3.7, // End radius
-                beryllium_attn // Attenuator
-            )
+                new AttenuatorLayer(
+                        3.5, // Start radius
+                        3.7, // End radius
+                        beryllium_attn // Attenuator
+                )
         );
 
         // Add silicon detectors
         for (double r : sd_radius) {
             detector_layers.add(
-                new DetectorLayer(
-                    r,
-                    (r + sd_thickness),
-                    silicon_attn
-                )
+                    new DetectorLayer(
+                            r,
+                            (r + sd_thickness),
+                            silicon_attn
+                    )
             );
         }
 
         // Add coincidence detectors
         detector_layers.add(
-            new DetectorLayer(
-                trigger_radius_A,
-                (trigger_radius_A + trigger_thickness),
-                silicon_attn
-            )
+                new DetectorLayer(
+                        trigger_radius_A,
+                        (trigger_radius_A + trigger_thickness),
+                        silicon_attn
+                )
         );
 
         detector_layers.add(
-            new DetectorLayer(
-                trigger_radius_B,
-                (trigger_radius_B + trigger_thickness),
-                silicon_attn
-            )
+                new DetectorLayer(
+                        trigger_radius_B,
+                        (trigger_radius_B + trigger_thickness),
+                        silicon_attn
+                )
         );
 
         // Add additional vacuum layers and sort into correct order
@@ -242,11 +276,11 @@ public class Simulation {
         double last = 0.0;
         for (Layer layer : layers) {
             layers2.add(
-                new FieldLayer(
-                    last,
-                    layer.start,
-                    mag_field
-                )
+                    new FieldLayer(
+                            last,
+                            layer.start,
+                            mag_field
+                    )
             );
 
             last = layer.end;

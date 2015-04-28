@@ -9,7 +9,4 @@ public class Layer {
 
     // This method must be created by all implementations of the layer class
     public boolean handle(Particle p) { return false; }
-
-    // Helper method
-    public double getThickness() { return end - start; }
 }

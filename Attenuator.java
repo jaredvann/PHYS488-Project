@@ -21,8 +21,8 @@ class Attenuator {
         // May introduce slight errors at far edge of material.
         double xa = x0() / density;
         mcsPreCalc =
-            13.6 * Helpers.CHARGE_ELECTRON *
-            Math.sqrt(stepSize / xa) * (1 + 0.038 * Math.log(stepSize / xa));
+                13.6 * Helpers.CHARGE_ELECTRON *
+                        Math.sqrt(stepSize / xa) * (1 + 0.038 * Math.log(stepSize / xa));
 
         // Precalculate some of energyLoss eqaution to save repetitive calculations.
         // Does not introduce approximations.
@@ -34,8 +34,8 @@ class Attenuator {
     private double x0() {
         double numer = 716.4 * massNumber; // Numerator
         double denom =
-            atomicNumber * (atomicNumber+1) *
-            Math.log(287 / Math.sqrt(atomicNumber)); // Denominator
+                atomicNumber * (atomicNumber+1) *
+                        Math.log(287 / Math.sqrt(atomicNumber)); // Denominator
 
         return (numer / denom); // Fraction
     }

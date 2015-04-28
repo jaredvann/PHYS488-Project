@@ -1,8 +1,9 @@
 package histogram;
 
 // Import statements
-import java.util.List;
+
 import java.util.ArrayList;
+import java.util.List;
 
 abstract class HistogramStorage {
     protected int total = 0;

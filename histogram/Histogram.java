@@ -1,11 +1,11 @@
 package histogram;
 
 // Import statements
-import java.util.Random;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
+
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Histogram {
     private HistogramStorage store;
