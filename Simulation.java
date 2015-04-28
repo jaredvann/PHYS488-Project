@@ -154,7 +154,7 @@ public class Simulation {
     }
 
     public double estimateMomentum(Particle p) {
-        // Get Coincidence Deteector properties
+        // Get Coincidence Detector properties
         double range = trigger_radius_B - (trigger_radius_A + trigger_thickness);
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
