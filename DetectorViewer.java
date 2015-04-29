@@ -1,3 +1,6 @@
+// All lengths in mm
+
+// Import statements
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -11,7 +14,7 @@ import java.util.ArrayList;
 
 
 public class DetectorViewer extends Application {
-    // Window size
+    // Window size, pixels
     private int width = 800;
     private int height = 800;
 
@@ -63,7 +66,7 @@ public class DetectorViewer extends Application {
     @Override
     public void start(Stage stage) {
         // Sort layers into correct order, will not draw correctly otherwise
-        layers = orderLayers(layers);
+        layers.sort((l1, l2) -> (new Double(l2.start)).compareTo(l1.start));
 
         // Setup JavaFX canvas
         Group root = new Group();
@@ -110,10 +113,5 @@ public class DetectorViewer extends Application {
                 );
             }
         }
-    }
-
-    public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
-        layers.sort((l1, l2) -> (new Double(l2.start)).compareTo(l1.start));
-        return layers;
     }
 }
