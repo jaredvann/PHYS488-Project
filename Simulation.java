@@ -206,6 +206,16 @@ public class Simulation {
         l.end = radius + trigger_thickness;
     }
 
+    public void updateTriggerRadius(double radius) {
+        double diff = trigger_radius_B - trigger_radius_A;
+
+        trigger_radius_A = radius;
+        updateTriggerRadiusA(trigger_radius_A);
+
+        trigger_radius_B = radius + diff;
+        updateTriggerRadiusB(trigger_radius_B);
+    }
+
     // Smears the angle using a gaussian distribution
     private double get_detector_angle(double angle) {
         // trigger_resolution == 'Bin Size'

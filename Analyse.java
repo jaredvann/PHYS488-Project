@@ -120,6 +120,7 @@ class Analyse {
             case "radiusA":
                 return simulation.trigger_radius_A;
             case "radiusB":
+            case "position":
                 return simulation.trigger_radius_B;
             case "resolution":
                 return simulation.trigger_resolution;
@@ -146,6 +147,9 @@ class Analyse {
                 break;
             case "radiusB":
                 simulation.updateTriggerRadiusB(val);
+                break;
+            case "position":
+                simulation.updateTriggerRadius(val);
                 break;
             case "resolution":
                 simulation.trigger_resolution = val;
