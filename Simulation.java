@@ -212,7 +212,6 @@ public class Simulation {
 
     public void updateTriggerRadius(double radius) {
         double diff = trigger_radius_B - trigger_radius_A;
-        System.out.println(diff);
 
         updateTriggerRadiusA(radius);
         updateTriggerRadiusB(radius + diff);
