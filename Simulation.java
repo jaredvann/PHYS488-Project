@@ -192,28 +192,32 @@ public class Simulation {
 
     public void updateTriggerRadiusA(double radius) {
         Layer l = layers.get(layers.size()-3);
+        Layer fl = layers.get(layers.size() - 2);
 
         trigger_radius_A = radius;
+
         l.start = radius;
-        l.end = radius + trigger_thickness;
+        l.end = fl.start = radius + trigger_thickness;
     }
 
     public void updateTriggerRadiusB(double radius) {
         Layer l = layers.get(layers.size() - 1);
+        Layer fl = layers.get(layers.size() - 2);
 
         trigger_radius_B = radius;
-        l.start = radius;
+
+        l.start = fl.end = radius;
         l.end = radius + trigger_thickness;
     }
 
     public void updateTriggerRadius(double radius) {
         double diff = trigger_radius_B - trigger_radius_A;
+        System.out.println(diff);
 
-        trigger_radius_A = radius;
-        updateTriggerRadiusA(trigger_radius_A);
-
-        trigger_radius_B = radius + diff;
-        updateTriggerRadiusB(trigger_radius_B);
+        updateTriggerRadiusA(radius);
+        updateTriggerRadiusB(radius + diff);
+        System.out.println(trigger_radius_A);
+        System.out.println(trigger_radius_B);
     }
 
     // Smears the angle using a gaussian distribution

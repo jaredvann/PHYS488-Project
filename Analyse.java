@@ -118,9 +118,9 @@ class Analyse {
             case "field":
                 return simulation.mag_field;
             case "radiusA":
+            case "position":
                 return simulation.trigger_radius_A;
             case "radiusB":
-            case "position":
                 return simulation.trigger_radius_B;
             case "resolution":
                 return simulation.trigger_resolution;
