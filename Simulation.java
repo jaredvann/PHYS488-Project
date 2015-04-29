@@ -215,8 +215,6 @@ public class Simulation {
 
         updateTriggerRadiusA(radius);
         updateTriggerRadiusB(radius + diff);
-        System.out.println(trigger_radius_A);
-        System.out.println(trigger_radius_B);
     }
 
     // Smears the angle using a gaussian distribution
