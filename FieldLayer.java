@@ -1,7 +1,6 @@
 class FieldLayer extends Layer {
     public double field;
 
-    private double stepSize;
     private static final int STEPS = 100;
 
     public FieldLayer(double _start,
@@ -10,8 +9,9 @@ class FieldLayer extends Layer {
         super(_start, _end);
 
         field = _field;
-        stepSize = (end - start) / STEPS;
     }
+
+    public double getStepSize() { return (end - start) / STEPS; }
 
     public boolean handle(Particle p) {
         double pX, pY;
@@ -21,6 +21,8 @@ class FieldLayer extends Layer {
         double pAzimuth   = p.azimuth;
         double pDirection = p.direction;
         double pCharge    = p.charge;
+
+        double stepSize = getStepSize();
 
         // Find the angle the particle momentum is changed by through one step
         // 1000 is to convert into GeV/c

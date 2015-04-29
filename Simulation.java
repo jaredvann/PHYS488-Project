@@ -191,18 +191,19 @@ public class Simulation {
     }
 
     public void updateTriggerRadiusA(double radius) {
-        Layer l = layers.get(layers.size()-3);
-        Layer fl = layers.get(layers.size() - 2);
+        Layer fl1 = layers.get(layers.size() - 4);
+        Layer l   = layers.get(layers.size()-3);
+        Layer fl2 = layers.get(layers.size() - 2);
 
         trigger_radius_A = radius;
 
-        l.start = radius;
-        l.end = fl.start = radius + trigger_thickness;
+        fl1.end = l.start = radius;
+        l.end = fl2.start = radius + trigger_thickness;
     }
 
     public void updateTriggerRadiusB(double radius) {
-        Layer l = layers.get(layers.size() - 1);
         Layer fl = layers.get(layers.size() - 2);
+        Layer l  = layers.get(layers.size() - 1);
 
         trigger_radius_B = radius;
 
