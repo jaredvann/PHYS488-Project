@@ -1,6 +1,4 @@
-package histogram;
-
-// Import statements
+package com.tspooner.histogram;
 
 import java.util.ArrayList;
 import java.util.Iterator;

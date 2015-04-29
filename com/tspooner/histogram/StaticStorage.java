@@ -1,6 +1,5 @@
-package histogram;
+package com.tspooner.histogram;
 
-// Import statements
 import java.text.DecimalFormat;
 
 public class StaticStorage extends HistogramStorage {
@@ -21,7 +20,7 @@ public class StaticStorage extends HistogramStorage {
 
         this.binLow = min;
         this.binHigh = max;
-        this.binWidth = (double) ((max - min) / size);
+        this.binWidth = (max - min) / size;
 
         this.overflows = 0;
         this.underflows = 0;
@@ -39,6 +38,14 @@ public class StaticStorage extends HistogramStorage {
     }
 
     public int getCount(double value) { return data[getOffset(value)]; }
+    
+    public int getCount(int index) {
+        if (index < data.length)
+            return data[index];
+        else
+            return 0;
+    }
+
     public int getAccumCount(double value) {
         int sum = 0;
         int offset = getOffset(value);
@@ -56,7 +63,7 @@ public class StaticStorage extends HistogramStorage {
     }
 
     public double getValueAtPercentile(int perc) {
-        int pSum = (int) getTotal() * perc / 100;
+        int pSum = getTotal() * perc / 100;
         int cSum = 0;
         int offset = size;
 
@@ -110,14 +117,14 @@ public class StaticStorage extends HistogramStorage {
 		}
 
 		// Append some other useful info
-		sb.append(sep + "Bin width:\t" + binWidth);
-		sb.append(sep + "Upper bound:\t" + binHigh);
-		sb.append(sep + "Lower bound:\t" + binLow);
+		sb.append(sep).append("Bin width:\t").append(binWidth);
+		sb.append(sep).append("Upper bound:\t").append(binHigh);
+		sb.append(sep).append("Lower bound:\t").append(binLow);
 
 		sb.append(sep);
 
-		sb.append(sep + "Underflows:\t" + underflows);
-		sb.append(sep + "Overflows:\t" + overflows);
+		sb.append(sep).append("Underflows:\t").append(underflows);
+		sb.append(sep).append("Overflows:\t").append(overflows);
 
 		return sb.toString();
 	}

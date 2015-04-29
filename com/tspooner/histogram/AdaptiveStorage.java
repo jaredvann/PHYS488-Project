@@ -1,6 +1,4 @@
-package histogram;
-
-// Import statements
+package com.tspooner.histogram;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -12,7 +10,9 @@ public class AdaptiveStorage extends HistogramStorage {
         tree = new Tree<Bin>(new Bin(0, min, max));
     }
 
-    public AdaptiveStorage() { tree = new Tree<Bin>(new Bin()); }
+    public AdaptiveStorage() {
+        tree = new Tree<Bin>(new Bin());
+    }
 
     public void reset() {
         Bin old = tree.getValue();
@@ -75,6 +75,14 @@ public class AdaptiveStorage extends HistogramStorage {
         return (null != bin) ? bin.count : 0;
     }
 
+    public int getCount(int index) {
+        List<Tree<Bin>> leaves = tree.fringe();
+        if (index < leaves.size())
+            return leaves.get(index).getValue().count;
+        else
+            return 0;
+    }
+
     public int getAccumCount(double value) {
         int sum = 0;
         for (Tree<Bin> leaf : tree) {
@@ -92,7 +100,7 @@ public class AdaptiveStorage extends HistogramStorage {
     }
 
     public double getValueAtPercentile(int perc) {
-        int pSum = (int) getTotal(tree) * perc / 100;
+        int pSum = getTotal(tree) * perc / 100;
         int cSum = 0;
         Bin bin = null;
 
