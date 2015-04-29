@@ -281,7 +281,7 @@ public class Simulation {
     private void fillLayerGaps() {
         // Add detector layers
         layers.addAll(detector_layers);
-        layers = Helpers.orderLayers(layers);
+        layers.sort((l1, l2) -> (new Double(l1.start)).compareTo(l2.start));
 
         // Add vacuum layers to fill in gaps between physical layers
         ArrayList<Layer> layers2 = new ArrayList<Layer>();
@@ -301,8 +301,8 @@ public class Simulation {
 
         // Add vacuum (field) layers to the rest of the layers
         layers.addAll(layers2);
-        // Make sure everything is in order
-        layers = Helpers.orderLayers(layers);
+        // One last check that every layer is in order
+        layers.sort((l1, l2) -> (new Double(l1.start)).compareTo(l2.start));
     }
 
     // Exports data in the format used by the DetectorViewer visualisation

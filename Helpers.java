@@ -104,9 +104,4 @@ class Helpers {
 
         return data;
     }
-
-    public static ArrayList<Layer> orderLayers(ArrayList<Layer> layers) {
-        layers.sort((l1, l2) -> (new Double(l1.start)).compareTo(l2.start));
-        return layers;
-    }
 }
