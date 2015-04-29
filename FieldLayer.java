@@ -1,6 +1,7 @@
 class FieldLayer extends Layer {
     public double field;
 
+    // Maximum number of steps to iterate through for each particle
     private static final int STEPS = 100;
 
     public FieldLayer(double _start,
@@ -11,11 +12,13 @@ class FieldLayer extends Layer {
         field = _field;
     }
 
+    // Step size is proportional to layer thickness and inversely proportional
+    // to the number of steps. This makes sure particles have a good chance of
+    // making it through the layer, whilst keeping good accuracy.
     public double getStepSize() { return (end - start) / STEPS; }
 
     public boolean handle(Particle p) {
-        double pX, pY;
-        double lX, lY, lTheta;
+        double pX, pY, lX, lY, lTheta;
 
         // Store particle properties as local variables
         double pAzimuth   = p.azimuth;
