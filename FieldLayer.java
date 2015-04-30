@@ -12,11 +12,6 @@ class FieldLayer extends Layer {
         field = _field;
     }
 
-    // Step size is proportional to layer thickness and inversely proportional
-    // to the number of steps. This makes sure particles have a good chance of
-    // making it through the layer, whilst keeping good accuracy.
-    public double getStepSize() { return (end - start) / STEPS; }
-
     public boolean handle(Particle p) {
         double pX, pY, lX, lY, lTheta;
 
@@ -25,17 +20,21 @@ class FieldLayer extends Layer {
         double pDirection = p.direction;
         double pCharge    = p.charge;
 
-        double stepSize = getStepSize();
+        // Step size is proportional to layer thickness and inversely
+        // proportional to the number of steps. This makes sure particles have
+        // a good chance of making it through the layer, whilst keeping good
+        // accuracy.
+        double stepSize = 10 * (end - start) / STEPS;
 
         // Find the angle the particle momentum is changed by through one step
-        // 1000 is to convert into GeV/c
+        // Multiplication by 1000 is to convert into GeV/c
         double theta = (stepSize * 1000 * 0.3 * field) / p.momentum;
 
         // Convert particle azimuthal angle into cartesian coordinates
         pX = start * Math.cos(pAzimuth);
         pY = start * Math.sin(pAzimuth);
 
-        for (int i = 0; i < 5*STEPS; i++) {
+        for (int i = 0; i < STEPS; i++) {
             // Calculate the angle of 'L'
             lTheta = pDirection + theta*-pCharge/2;
 
