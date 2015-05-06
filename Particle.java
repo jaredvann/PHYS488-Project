@@ -57,7 +57,7 @@ public class Particle {
     }
 
     public double getTraceAt(double r) {
-        r = Math.round(r*100) / 100;
+        r = Math.round(r*10000) / 10000;
         return trace.get(r);
     }
 }

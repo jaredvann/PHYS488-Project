@@ -41,10 +41,10 @@ public class DetectorViewer extends Application {
             layers.add(new Layer(r, r+1));
 
         for (double r : silicon)
-            detector_layers.add(new DetectorLayer(r));
+            detector_layers.add(new DetectorLayer(r, 0, null));
 
         for (double r : coincidence)
-            detector_layers.add(new DetectorLayer(r));
+            detector_layers.add(new DetectorLayer(r, 0, null));
 
         // Load hits data
         ArrayList<double[]> data = Helpers.read_CSV("layers.csv");

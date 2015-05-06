@@ -157,6 +157,7 @@ public class Simulation {
     public double estimateMomentum(Particle p) {
         // Get Coincidence Detector properties
         double range = trigger_radius_B - (trigger_radius_A + trigger_thickness);
+
         // Get angles at the two coincidence detectors
         // --- For reference: see final page of project handout
         //                    these are the angles phi_9A and phi_9B
@@ -228,18 +229,20 @@ public class Simulation {
     // Sets up all the physical detector layers and the empty gaps in between
     private void generateLayers() {
         // Silicon detector (sd) radii and thickness of layers
-        double[] sd_radius = { 4.5, 8, 12, 18, 30, 40, 50, 70 };
-        double sd_thickness = 0.05; // cm
+        double[] sd_radius = { 0.045, 0.08, 0.12, 0.18, 0.3, 0.4, 0.5, 0.7 }; // m
+        double sd_thickness = 0.0005; // m
+
+        int stepCount = 30;
 
         // Initialise beryllium/silicon attenuators
-        Attenuator beryllium_attn = new Attenuator(4, 9.0121831, 1.85, 0.3/20);
-        Attenuator silicon_attn = new Attenuator(14, 28.0855, 2.3290, sd_thickness/20);
+        Attenuator beryllium_attn = new Attenuator(4, 9.0121831, 1.85, (0.003 / stepCount));
+        Attenuator silicon_attn = new Attenuator(14, 28.0855, 2.3290, (sd_thickness / stepCount));
 
         // Add beryllium beam pipe
         layers.add(
                 new AttenuatorLayer(
-                        3.5, // Start radius
-                        3.7, // End radius
+                        0.035, // Start radius (m)
+                        0.037, // End radius (m)
                         beryllium_attn // Attenuator
                 )
         );

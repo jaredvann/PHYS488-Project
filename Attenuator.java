@@ -16,7 +16,7 @@ class Attenuator {
     }
 
     private void init(double stepSize) {
-        // Precalculate most of mcsTheta equation to save repetitive calculations.
+        // Pre-calculate most of mcsTheta equation to save repetitive calculations.
         // Approximates step size as constant.
         // May introduce slight errors at far edge of material.
         double xa = x0() / density;
@@ -24,7 +24,7 @@ class Attenuator {
                 13.6 * Helpers.CHARGE_ELECTRON *
                         Math.sqrt(stepSize / xa) * (1 + 0.038 * Math.log(stepSize / xa));
 
-        // Precalculate some of energyLoss eqaution to save repetitive calculations.
+        // Pre-calculate some of energyLoss equation to save repetitive calculations.
         // Does not introduce approximations.
         eLossPreCalc = 0.307 * density * atomicNumber/massNumber;
         // 2 * Electron Mass / Inertia Moment
