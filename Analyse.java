@@ -52,36 +52,27 @@ class Analyse {
         // Create array for output data
         double[][] output = new double[step_count][];
 
-        double sum, value;
+        double sum, value, estCount;
 
         System.out.println("Started simulations");
 
         // Loop through each step
         for (int i = 0; i < step_count; i++) {
-            // Initialise sub-array to hold sample results
-            output[i] = new double[(3+sample_size)];
+            System.out.println("Running simulation " + (i+1) + "/" + step_count);
 
-            // Set the first value to the variating config value
-            output[i][0] = getVar();
+            estCount = 0;
 
-            sum = 0;
-
-            // Run samples
-            double[] sample = new double[sample_size];
-            for (int j = 0; j < sample_size; j++) {
-                System.out.println("Running simulation " + (i*sample_size + j+1) + "/" + step_count*sample_size);
-
-                value = analyse(simulation.run_simulation());
-                output[i][(1+j)] = sample[j] = value;
-
-                sum += value;
+            for (double[] row : simulation.run_simulation()) {
+                if (row[4] >= simulation.momentum_limit) {
+                    estCount += 1;
+                }
             }
 
-            // Add average and stderr values of all samples to end of line
-            double mean = sum / sample_size;
-
-            output[i][sample_size+1] = mean;
-            output[i][sample_size+2] = stderr(sample, mean);
+            output[i] = new double[]{
+                getVar(),
+                estCount*100 / simulation.num_particles,
+                0
+            };
 
             // Increment the value of the changing parameter for the next iteration
             updateVar(getVar() + step_size);
@@ -90,18 +81,6 @@ class Analyse {
         System.out.println("Simulations and analysis finished");
 
         return output;
-    }
-
-    public static double analyse(double[][] data) throws IOException {
-        double estCount = 0;
-
-        for (double[] row : data) {
-            if (row[4] >= simulation.momentum_limit) {
-                estCount += 1;
-            }
-        }
-
-        return estCount*100 / data.length;
     }
 
     private static double getVar() {
