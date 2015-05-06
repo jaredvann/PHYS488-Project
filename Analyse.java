@@ -93,20 +93,15 @@ class Analyse {
     }
 
     public static double analyse(double[][] data) throws IOException {
-        double count = 0;
         double estCount = 0;
 
         for (double[] row : data) {
-            if (row[2] >= simulation.momentum_limit) {
-                count += 1;
-            }
-
             if (row[4] >= simulation.momentum_limit) {
                 estCount += 1;
             }
         }
 
-        return estCount*100 / count;
+        return estCount*100 / data.length;
     }
 
     private static double getVar() {

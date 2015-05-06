@@ -100,7 +100,8 @@ public class Simulation {
 
         screen.println("\n[*] Actual Count:    " + count);
         screen.println("[*] Estimated Count: " + estCount);
-        screen.println("[*] Efficiency:      " + ((count == 0) ? 0 : (estCount*100/count)) + "%\n");
+        screen.println("[*] Abs Efficiency: " + (estCount / simulation.num_particles));
+        screen.println("[*] WRT Efficiency:      " + ((count == 0) ? 0 : (estCount*100/count)) + "%\n");
     }
 
     // This is where the magic happens!
