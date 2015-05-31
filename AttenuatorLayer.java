@@ -16,19 +16,13 @@ public class AttenuatorLayer extends Layer {
         attn = _attn;
     }
 
-    public boolean handle(Particle particle) {
-        // Create local variables of particle properties
-        double mass = particle.mass;
-        double momentum = particle.momentum;
-        double direction = particle.direction;
-        double azimuth = particle.azimuth;
-
+    public boolean handle(Particle p) {
         // Energy loss and theta dependent on momentum which varies as particle
         // is attenuated, however changes in momentum are so small, as an
         // approximation, all steps can use the same value to save calculation
         // in each step
-        double energyLoss = attn.getEnergyLoss(mass, momentum);
-        double theta = attn.getTheta(mass, momentum);
+        double energyLoss = attn.getEnergyLoss(p.mass, p.momentum);
+        double theta = attn.getTheta(p.mass, p.momentum);
 
         double thetaSmeared;
 
@@ -40,18 +34,12 @@ public class AttenuatorLayer extends Layer {
             thetaSmeared = Helpers.gauss(0, theta);
             distance = stepSize / Math.cos(thetaSmeared); // Hypotenuse
 
-            momentum -= energyLoss * Math.abs(distance);
-            direction += thetaSmeared;
-            azimuth += stepSize * Math.tan(thetaSmeared);
+            p.momentum -= energyLoss * Math.abs(distance);
+            p.direction += thetaSmeared;
+            p.azimuth += stepSize * Math.tan(thetaSmeared);
 
-            if (momentum <= 0)
-                return false;
+            if (p.momentum <= 0) { return false; }
         }
-
-        // Update particle instance with new properties
-        particle.setMomentum(momentum);
-        particle.setDirection(direction);
-        particle.setAzimuth(end, azimuth);
 
         // Particle has successfully made it through the attenuator layer
         return true;

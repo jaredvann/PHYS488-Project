@@ -15,11 +15,6 @@ class FieldLayer extends Layer {
     public boolean handle(Particle p) {
         double pX, pY, lX, lY, lTheta;
 
-        // Store particle properties as local variables
-        double pAzimuth   = p.azimuth;
-        double pDirection = p.direction;
-        double pCharge    = p.charge;
-
         // Step size is proportional to layer thickness and inversely
         // proportional to the number of steps. This makes sure particles have
         // a good chance of making it through the layer, whilst keeping good
@@ -31,12 +26,12 @@ class FieldLayer extends Layer {
         double theta = (stepSize * (1000 * 0.3 * field)) / p.momentum;
 
         // Convert particle azimuthal angle into cartesian coordinates
-        pX = start * Math.cos(pAzimuth);
-        pY = start * Math.sin(pAzimuth);
+        pX = start * Math.cos(p.azimuth);
+        pY = start * Math.sin(p.azimuth);
 
         for (int i = 0; i < (STEPS * 5); i++) {
             // Calculate the angle of 'L'
-            lTheta = pDirection + theta*-pCharge/2;
+            lTheta = p.direction - theta*p.charge/2;
 
             // Create 'L' vector in cartesian coordinates
             // 'L' is the straight line distance the particle moves in the step
@@ -48,16 +43,12 @@ class FieldLayer extends Layer {
             pY = pY + lY;
 
             // Bend the angle of the momentum vector depending on charge
-            pDirection = pDirection + theta*-pCharge;
+            p.direction -= theta*p.charge;
 
             // End loop if particle leaves field layer
             if ((pX*pX + pY*pY) >= end*end) {
                 // Convert particle position back into polar coordinates
-                pAzimuth = Math.atan2(pY, pX);
-
-                // Update particle properties
-                p.setAzimuth(end, pAzimuth);
-                p.setDirection(pDirection);
+                p.azimuth = Math.atan2(pY, pX);
 
                 return true;
             }
